@@ -19,6 +19,13 @@ class Predictor {
 	def ds = "data/FantasyPros_Fantasy_Football_Rankings_DEF.csv"
 	def ks = "data/FantasyPros_Fantasy_Football_Rankings_K.csv"
 
+    def QB = 0
+	def DEF = 6
+	def KICKER = 7
+	def FLEX = 8
+
+	def table = new MemoTable()
+
 	def salaries = [:]
 	def projections_qb = [:]
 	def projections_rb = [:]
@@ -45,6 +52,11 @@ class Predictor {
 
 	def wr1Index = 0
 	def rb1Index = 0
+
+
+    def tableHits = 0
+    def tableMisses = 0
+    def tableHitRate = [0,0,0,0,0,0,0,0,0]
 
 	/**
 	 * Parses the salaries from the salaries CSV into a map keyed by the player name.
@@ -123,6 +135,17 @@ class Predictor {
 
 		return true
 	}
+
+    def reportTableStats() {
+        def total = tableHits + tableMisses
+        if(total % 10000 == 0 && tableHits > 0) {
+            println "Table hits ${ tableHits/total }% \t\tTable misses ${ tableMisses/total }%\t\t\t" +
+                    "(${table.items[0].size()}/${table.items[1].size()}/${table.items[2].size()}/${table.items[3].size()}/" +
+                    "${table.items[4].size()}/${table.items[5].size()}/${table.items[6].size()}/${table.items[7].size()}/${table.items[8].size()})" +
+                    "\t\t\t(${tableHitRate[0]/tableHits}/${tableHitRate[1]/tableHits}/${tableHitRate[2]/tableHits}/${tableHitRate[3]/tableHits}/${tableHitRate[4]/tableHits}/" +
+                    "${tableHitRate[5]/tableHits}/${tableHitRate[6]/tableHits}/${tableHitRate[7]/tableHits}/${tableHitRate[8]/tableHits})"
+        }
+    }
 
 	def cleanData() {
 		// Clear out any salaries that don't have projections.
@@ -232,81 +255,148 @@ class Predictor {
 	}
 
 	def generateOptimalTeamMemoization(depth, budget, totalPoints, roster) {
-//		positionAtDepth[depth].eachWithIndex { name,points, i ->
 
-		// Don't bother if we can't afford anyone
-		if(budget < 3000)
-			return
+		if(depth == FLEX) {
+			def bestPointsForFlex = 0
+			def best = null
 
-		def i =0
-		for(e in positionAtDepth[depth]) {
-			/*
-			 * Skip to k+1 index for RB2 and WR2.
-			 */
-			if(depth == 1) {
-				rb1Index = i
-			}
-			else if(depth == 3) {
-				wr1Index = i
-			}
-			else if( (depth == 2 && i<= rb1Index) || (depth == 4 && i<= wr1Index) ) {
-				i++
-				continue
-			}
+            /*
+             * Do we have a pre-computed solution for this budget?
+             */
+			def result = table.getSolution(FLEX, budget)
+			if(result) {
+//                println "Found solution from table for depth ${depth} and budget ${budget} - ${result.lowCost} to ${result.highCost}"
+                tableHits++
+                tableHitRate[depth]++
+                return result
+            }
+            else {
+                tableMisses++
+            }
 
-			def name = e.key
-			def points = e.value
-			def isDupe = false
+            reportTableStats()
 
-			// 2nd running back or 2nd wide receiver - check for dupes
-			if( (depth == 2 && name == roster[1]) || (depth == 4 && name == roster[3]) ||
-					(depth == 8 && (name == roster[1] || name == roster[2] || name == roster[3] || name == roster[4] || name == roster[5])) ) {
-				isDupe = true
-			}
-
-			if(!isDupe) {
-				def cost = salaries[name]
-				budget -= cost
-
-				// Does adding this player put us over-budget?
-				if(budget >= 0) {
-					totalPoints += points
-					roster << name
-
-					if(depth < 8) {
-						generateOptimalTeamRecursion(depth+1, budget, totalPoints, roster)
-					}
-					else if(totalPoints > bestPoints) {
-						println "Found best configuration so far with ${ totalPoints } for the following players:"
-						bestRoster.clear()
-						roster.each { p ->
-							println "\t${ p }"
-							bestRoster << p
-						}
-
-						bestPoints = totalPoints
-					}
-
-					totalPoints -= points
-					roster.remove(roster.size()-1)
+            /*
+             * No pre-computed solution.  Go through each option and determine the most valuable
+             * for the budget provided.
+             */
+			for(e in projections_flex) {
+				if(salaries[e.key] <= budget && e.value > bestPointsForFlex) {
+					bestPointsForFlex = e.value
+					best = e.key
 				}
-				// Is what we have up to this point the best configuration?
-				else if(totalPoints > bestPoints) {
-					println "Found best configuration so far with ${ totalPoints } for the following players:"
-					bestRoster.clear()
-					roster.each { p ->
-						println "\t${ p }"
-						bestRoster << p
-					}
-
-					bestPoints = totalPoints
-				}
-
-				budget += cost
 			}
 
-			i++
+			def newItem
+			if(best) {
+				newItem = new MemoItem(lowCost: salaries[best], highCost: budget, points: bestPointsForFlex, roster: [best])
+
+				// Write to table
+				table.writeSolution(FLEX, newItem)
+			}
+
+			return newItem
 		}
+        else {
+            def result = table.getSolution(depth, budget)
+			if(result) {
+//                println "Found solution from table for depth ${depth} and budget ${budget} - ${result.lowCost} to ${result.highCost}"
+                tableHits++
+                tableHitRate[depth]++
+                return result
+            }
+            else {
+                tableMisses++
+            }
+
+            reportTableStats()
+
+            def i=0
+            for(e in positionAtDepth[depth]) {
+                /*
+                 * Skip to k+1 index for RB2 and WR2.
+                 */
+                if(depth == 1) {
+                    rb1Index = i
+                }
+                else if(depth == 3) {
+                    wr1Index = i
+                }
+                else if( (depth == 2 && i<= rb1Index) || (depth == 4 && i<= wr1Index) ) {
+                    println "Skipping ${e.key} at depth ${depth}"
+                    i++
+                    continue
+                }
+
+                // Can I afford this player?
+                def cost = salaries[e.key]
+                def points = e.value
+                if(cost <= budget) {
+                    result = null
+                    if(budget-cost >= 3000) {
+                        roster << e.key
+                        result = generateOptimalTeamMemoization(depth+1, budget - cost, totalPoints + points, roster)
+                        roster.remove(e.key)
+
+                        // Do we have an optimal solution?
+                        if(result && totalPoints + e.value + result.points > bestPoints) {
+                            bestPoints = totalPoints + e.value + result.points
+                            bestRoster.clear()
+                            bestRoster = roster + e.key
+                            bestRoster.addAll(result.roster)
+
+                            println "Found best configuration so far with ${ bestPoints } for the following players:"
+                            def sal = 0
+                            bestRoster.each { p -> println "\t${ p } (${ salaries[p] })"; sal += salaries[p] }
+                            println "\tTotal salary: ${sal}"
+
+                            def newItem = new MemoItem(lowCost: salaries[e.key] + result.lowCost, highCost: budget, points: e.value + result.points, roster: [e.key])
+                            newItem.roster.addAll(result.roster)
+                            table.writeSolution(depth, newItem)
+                        }
+                    }
+                }
+
+                i++
+            }
+        }
+//		else {
+//			def result = table.getSolution(depth, budget)
+//			if(result) {
+////                println "Found solution from table for depth ${depth} and budget ${budget} - ${result.lowCost} to ${result.highCost}"
+//                return result
+//            }
+//
+//			for(e in positionAtDepth[depth]) {
+//				// Can I afford this player?
+//				def cost = salaries[e.key]
+//				def points = e.value
+//				if(cost <= budget) {
+//					if(!result && budget-cost >= 3000) {
+//						roster << e.key
+//						result = generateOptimalTeamMemoization(depth+1, budget - cost, totalPoints + points, roster)
+//						roster.remove(e.key)
+//					}
+//
+//					// Do we have an optimal solution?
+//					if(result && totalPoints + e.value + result.points > bestPoints) {
+//						bestPoints = totalPoints + e.value + result.points
+//						bestRoster.clear()
+//						bestRoster = roster + e.key
+//						bestRoster.addAll(result.roster)
+//
+//						println "Found best configuration so far with ${ bestPoints } for the following players:"
+//                        def sal = 0
+//						bestRoster.each { p -> println "\t${ p } (${ salaries[p] })"; sal += salaries[p] }
+//                        println "\tTotal salary: ${sal}"
+//
+//						def newItem = new MemoItem(lowCost: salaries[e.key] + result.lowCost, highCost: budget, points: e.value + result.points, roster: [e.key])
+//						newItem.roster.addAll(result.roster)
+//						table.writeSolution(depth, newItem)
+//					}
+//				}
+//			}
+//		}
 	}
 
 	def generateOptimalTeamByBruteForce() {
@@ -371,7 +461,11 @@ class Predictor {
 		p.projections_flex.putAll(p.projections_te)
 		p.projections_flex.sort()
 
+        long start = System.currentTimeMillis()
 //		p.generateOptimalTeamByBruteForce()
-		p.generateOptimalTeamRecursion(0, 50000, 0, [])
+//		p.generateOptimalTeamRecursion(0, 50000, 0, [])
+		p.generateOptimalTeamMemoization(0, 50000, 0, [])
+        long end = System.currentTimeMillis()
+        println "Computed optimal roster in ${ (end-start)/1000.0 } seconds."
 	}
 }
