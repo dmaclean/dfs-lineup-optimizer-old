@@ -1,8 +1,4 @@
 package com.traderapist.prediction
-
-import groovyx.net.http.ContentType
-import groovyx.net.http.HTTPBuilder
-
 /**
  * Created with IntelliJ IDEA.
  * User: dmaclean
@@ -138,13 +134,20 @@ class Predictor {
 
     def reportTableStats() {
         def total = tableHits + tableMisses
-        if(total % 10000 == 0 && tableHits > 0) {
+        if(total % 100000 == 0 && tableHits > 0) {
             println "Table hits ${ tableHits/total }% \t\tTable misses ${ tableMisses/total }%\t\t\t" +
                     "(${table.items[0].size()}/${table.items[1].size()}/${table.items[2].size()}/${table.items[3].size()}/" +
                     "${table.items[4].size()}/${table.items[5].size()}/${table.items[6].size()}/${table.items[7].size()}/${table.items[8].size()})" +
                     "\t\t\t(${tableHitRate[0]/tableHits}/${tableHitRate[1]/tableHits}/${tableHitRate[2]/tableHits}/${tableHitRate[3]/tableHits}/${tableHitRate[4]/tableHits}/" +
                     "${tableHitRate[5]/tableHits}/${tableHitRate[6]/tableHits}/${tableHitRate[7]/tableHits}/${tableHitRate[8]/tableHits})"
         }
+    }
+
+    def printOptimalRoster() {
+        println "Found best configuration so far with ${ bestPoints } for the following players:"
+        def sal = 0
+        bestRoster.each { p -> println "\t${ p } (${ salaries[p] })"; sal += salaries[p] }
+        println "\tTotal salary: ${sal}"
     }
 
 	def cleanData() {
@@ -265,7 +268,6 @@ class Predictor {
              */
 			def result = table.getSolution(FLEX, budget)
 			if(result) {
-//                println "Found solution from table for depth ${depth} and budget ${budget} - ${result.lowCost} to ${result.highCost}"
                 tableHits++
                 tableHitRate[depth]++
                 return result
@@ -281,6 +283,11 @@ class Predictor {
              * for the budget provided.
              */
 			for(e in projections_flex) {
+                def name = e.key
+                if( (name == roster[1] || name == roster[2] || name == roster[3] || name == roster[4] || name == roster[5]) ) {
+                    continue
+                }
+
 				if(salaries[e.key] <= budget && e.value > bestPointsForFlex) {
 					bestPointsForFlex = e.value
 					best = e.key
@@ -299,8 +306,7 @@ class Predictor {
 		}
         else {
             def result = table.getSolution(depth, budget)
-			if(result) {
-//                println "Found solution from table for depth ${depth} and budget ${budget} - ${result.lowCost} to ${result.highCost}"
+            if(result) {
                 tableHits++
                 tableHitRate[depth]++
                 return result
@@ -323,7 +329,7 @@ class Predictor {
                     wr1Index = i
                 }
                 else if( (depth == 2 && i<= rb1Index) || (depth == 4 && i<= wr1Index) ) {
-                    println "Skipping ${e.key} at depth ${depth}"
+//                    println "Skipping ${e.key} at depth ${depth}"
                     i++
                     continue
                 }
@@ -340,16 +346,25 @@ class Predictor {
 
                         // Do we have an optimal solution?
                         if(result && totalPoints + e.value + result.points > bestPoints) {
-                            bestPoints = totalPoints + e.value + result.points
-                            bestRoster.clear()
-                            bestRoster = roster + e.key
-                            bestRoster.addAll(result.roster)
+                            def newRoster = []
+                            newRoster.addAll(roster)
+                            newRoster.add(e.key)
+                            newRoster.addAll(result.roster)
+                            Set set = new HashSet(newRoster)
 
-                            println "Found best configuration so far with ${ bestPoints } for the following players:"
-                            def sal = 0
-                            bestRoster.each { p -> println "\t${ p } (${ salaries[p] })"; sal += salaries[p] }
-                            println "\tTotal salary: ${sal}"
+                            if(set.size() == newRoster.size()) {
+                                bestPoints = totalPoints + e.value + result.points
+                                bestRoster.clear()
+                                bestRoster = newRoster
 
+                                printOptimalRoster()
+                            }
+                            else {
+                                println "Duplicates in roster.  Throwing it away."
+                            }
+                        }
+
+                        if(result) {
                             def newItem = new MemoItem(lowCost: salaries[e.key] + result.lowCost, highCost: budget, points: e.value + result.points, roster: [e.key])
                             newItem.roster.addAll(result.roster)
                             table.writeSolution(depth, newItem)
@@ -360,43 +375,6 @@ class Predictor {
                 i++
             }
         }
-//		else {
-//			def result = table.getSolution(depth, budget)
-//			if(result) {
-////                println "Found solution from table for depth ${depth} and budget ${budget} - ${result.lowCost} to ${result.highCost}"
-//                return result
-//            }
-//
-//			for(e in positionAtDepth[depth]) {
-//				// Can I afford this player?
-//				def cost = salaries[e.key]
-//				def points = e.value
-//				if(cost <= budget) {
-//					if(!result && budget-cost >= 3000) {
-//						roster << e.key
-//						result = generateOptimalTeamMemoization(depth+1, budget - cost, totalPoints + points, roster)
-//						roster.remove(e.key)
-//					}
-//
-//					// Do we have an optimal solution?
-//					if(result && totalPoints + e.value + result.points > bestPoints) {
-//						bestPoints = totalPoints + e.value + result.points
-//						bestRoster.clear()
-//						bestRoster = roster + e.key
-//						bestRoster.addAll(result.roster)
-//
-//						println "Found best configuration so far with ${ bestPoints } for the following players:"
-//                        def sal = 0
-//						bestRoster.each { p -> println "\t${ p } (${ salaries[p] })"; sal += salaries[p] }
-//                        println "\tTotal salary: ${sal}"
-//
-//						def newItem = new MemoItem(lowCost: salaries[e.key] + result.lowCost, highCost: budget, points: e.value + result.points, roster: [e.key])
-//						newItem.roster.addAll(result.roster)
-//						table.writeSolution(depth, newItem)
-//					}
-//				}
-//			}
-//		}
 	}
 
 	def generateOptimalTeamByBruteForce() {
@@ -467,5 +445,7 @@ class Predictor {
 		p.generateOptimalTeamMemoization(0, 50000, 0, [])
         long end = System.currentTimeMillis()
         println "Computed optimal roster in ${ (end-start)/1000.0 } seconds."
+
+        p.printOptimalRoster()
 	}
 }
