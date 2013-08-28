@@ -33,5 +33,18 @@ class MemoTable {
 	def writeSolution(index, newItem) {
 		items[index] << newItem
 		items[index].sort()
+
+        // Consolidate overlapping entries (this shouldn't happen)
+        for(int i=0; i<items[index].size()-1; i++) {
+            if(items[index][i].highCost == items[index][i+1].highCost && items[index][i].lowCost < items[index][i+1].lowCost) {
+                if(items[index][i].points > items[index][i+1].points) {
+                    items[index].remove(i+1)
+                }
+//                else {
+//                    items[index][i+1].lowCost = items[index][i].lowCost
+//                    items[index].remove(i)
+//                }
+            }
+        }
 	}
 }
