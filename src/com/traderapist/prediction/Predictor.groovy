@@ -1,4 +1,8 @@
 package com.traderapist.prediction
+
+import com.traderapist.parsers.DraftKingsParser
+import com.traderapist.parsers.FanDuelParser
+
 /**
  * Created with IntelliJ IDEA.
  * User: dmaclean
@@ -7,7 +11,10 @@ package com.traderapist.prediction
  * To change this template use File | Settings | File Templates.
  */
 class Predictor {
-	def salaryFile = "data/DKSalaries.csv"
+    def site
+
+	def draftKingsSalaryFile = "data/draftkings/DKSalaries.csv"
+    def fanDuelSalaryFile = "data/fanduel/salaries.txt"
 	def qbs = "data/FantasyPros_Fantasy_Football_Rankings_QB.csv"
 	def rbs = "data/FantasyPros_Fantasy_Football_Rankings_RB.csv"
 	def wrs = "data/FantasyPros_Fantasy_Football_Rankings_WR.csv"
@@ -54,23 +61,45 @@ class Predictor {
     def tableMisses = 0
     def tableHitRate = [0,0,0,0,0,0,0,0,0]
 
+    def budget
+    def minCost = Integer.MAX_VALUE
+
+    static def DRAFT_KINGS = "DRAFT_KINGS"
+    static def FAN_DUEL = "FAN_DUEL"
+
 	/**
 	 * Parses the salaries from the salaries CSV into a map keyed by the player name.
 	 *
 	 * @return
 	 */
-	def readSalaries(file) {
-		new File(file).eachLine { line ->
-			def pieces = line.split(",")
-			def name = pieces[1].replaceAll("\"", "").replaceAll("\\.", "").trim().toLowerCase()
-			def salary = pieces[2].toInteger()
+	def readSalaries() {
+        def parser
+        if(site == DRAFT_KINGS) {
+            parser = new DraftKingsParser()
+            parser.readSalaries(draftKingsSalaryFile)
+            parser.parse()
+        }
+        else if(site == FAN_DUEL) {
+            parser = new FanDuelParser()
+            parser.readSalaries(fanDuelSalaryFile)
+            parser.parse()
+        }
 
-			if(salaries.containsKey(name)) {
-				println "Salaries already contains ${ name }"
-				return false
-			}
-			salaries[name] = salary
-		}
+        parser.output.each { line ->
+            def pieces = line.split(",")
+            def name = pieces[1].replaceAll("\"", "").replaceAll("\\.", "").replaceAll("null", "").trim().toLowerCase()
+            def salary = pieces[2].toInteger()
+
+            if(salary < minCost)
+                minCost = salary
+
+            if(salaries.containsKey(name)) {
+                println "Salaries already contains ${ name }"
+                return false
+            }
+            salaries[name] = salary
+        }
+
 
 		return true
 	}
@@ -183,7 +212,7 @@ class Predictor {
 //		positionAtDepth[depth].eachWithIndex { name,points, i ->
 
 		// Don't bother if we can't afford anyone
-		if(budget < 3000)
+		if(budget < minCost)
 			return
 
 		def i =0
@@ -427,9 +456,16 @@ class Predictor {
 	}
 
 	public static void main(String[] args) {
-		def p = new Predictor()
+        if(args.length < 2 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}") || !args[1].matches("\\d+")) {
+            println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS> <budget>"
+            return
+        }
 
-		if(!p.readSalaries(p.salaryFile))
+		def p = new Predictor()
+        p.site = (args[0] == FAN_DUEL) ? FAN_DUEL : DRAFT_KINGS
+        p.budget = args[1].toInteger()
+
+		if(!p.readSalaries())
 			return
 
 		p.readProjections()
@@ -442,7 +478,7 @@ class Predictor {
         long start = System.currentTimeMillis()
 //		p.generateOptimalTeamByBruteForce()
 //		p.generateOptimalTeamRecursion(0, 50000, 0, [])
-		p.generateOptimalTeamMemoization(0, 50000, 0, [])
+		p.generateOptimalTeamMemoization(0, p.budget, 0, [])
         long end = System.currentTimeMillis()
         println "Computed optimal roster in ${ (end-start)/1000.0 } seconds."
 
