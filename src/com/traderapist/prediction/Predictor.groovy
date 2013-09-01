@@ -25,7 +25,7 @@ class Predictor {
     def QB = 0
 	def DEF = 6
 	def KICKER = 7
-	def FLEX = 8
+	static def FLEX = 8
 
 	def table = new MemoTable()
 
