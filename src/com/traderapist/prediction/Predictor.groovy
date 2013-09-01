@@ -325,7 +325,7 @@ class Predictor {
 
 			def newItem
 			if(best) {
-				newItem = new MemoItem(lowCost: salaries[best], highCost: budget, points: bestPointsForFlex, roster: [best])
+				newItem = new MemoItem(cost: budget, points: bestPointsForFlex, roster: [best])
 
 				// Write to table
 				table.writeSolution(FLEX, newItem)
@@ -368,7 +368,7 @@ class Predictor {
                 def points = e.value
                 if(cost <= budget) {
                     result = null
-                    if(budget-cost >= 3000) {
+                    if(budget-cost >= minCost) {
                         roster << e.key
                         result = generateOptimalTeamMemoization(depth+1, budget - cost, totalPoints + points, roster)
                         roster.remove(e.key)
@@ -394,7 +394,7 @@ class Predictor {
                         }
 
                         if(result) {
-                            def newItem = new MemoItem(lowCost: salaries[e.key] + result.lowCost, highCost: budget, points: e.value + result.points, roster: [e.key])
+                            def newItem = new MemoItem(cost: salaries[e.key] + result.cost, points: e.value + result.points, roster: [e.key])
                             newItem.roster.addAll(result.roster)
                             table.writeSolution(depth, newItem)
                         }

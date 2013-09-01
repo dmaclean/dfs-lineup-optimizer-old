@@ -11,12 +11,7 @@ class MemoItem implements Comparable<MemoItem> {
 	/*
 	 * We support a range of values for the cost.  This is the smaller value of the range.
 	 */
-	Double lowCost
-
-	/*
-	 * * We support a range of values for the cost.  This is the larger value of the range.
-	 */
-	Double highCost
+	Double cost
 
 	/*
 	 * The number of points projected for this collection of players
@@ -30,10 +25,10 @@ class MemoItem implements Comparable<MemoItem> {
 
 	@Override
 	int compareTo(MemoItem t) {
-		if(highCost < t.lowCost) {
+		if(cost < t.cost) {
 			return -1
 		}
-		else if(lowCost > t.highCost) {
+		else if(cost > t.cost) {
 			return 1
 		}
 
