@@ -8,17 +8,11 @@ package com.traderapist.prediction
  * To change this template use File | Settings | File Templates.
  */
 class MemoTable {
-	def items = [
-	        [],     // QB
-            [],     // RB1
-            [],     // RB2
-            [],     // WR1
-            [],     // WR2
-            [],     // TE
-            [],     // DEF
-            [],     // K
-            []      // FLEX
-	]
+	def items = []
+
+	def initializeItemsList(positions) {
+		positions.split(",").each { items << [] }
+	}
 
     /**
      * Retrieve the optimal player configuration for our budget.  This takes advantage

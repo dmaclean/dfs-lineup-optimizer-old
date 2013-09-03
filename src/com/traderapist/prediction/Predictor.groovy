@@ -11,7 +11,10 @@ import com.traderapist.parsers.FanDuelParser
  * To change this template use File | Settings | File Templates.
  */
 class Predictor {
-    def site
+	/**
+	 * The service we are doing predictions for - FanDuel or Draft Kings.
+	 */
+	def site
 
 	def draftKingsSalaryFile = "data/draftkings/DKSalaries.csv"
     def fanDuelSalaryFile = "data/fanduel/salaries.txt"
@@ -22,13 +25,14 @@ class Predictor {
 	def ds = "data/FantasyPros_Fantasy_Football_Rankings_DEF.csv"
 	def ks = "data/FantasyPros_Fantasy_Football_Rankings_K.csv"
 
-    def QB = 0
-	def DEF = 6
-	def KICKER = 7
-	static def FLEX = 8
+    def table = new MemoTable()
 
-	def table = new MemoTable()
-
+	/**
+	 * A map of the salaries for players, key is player name and value is their salary.
+	 * Because the key is the player name, we need to clean the data beforehand to ensure
+	 * there are no duplicates.  Usually, a sufficient way is to append the team name
+	 * to resolve collisions.
+	 */
 	def salaries = [:]
 	def projections_qb = [:]
 	def projections_rb = [:]
@@ -38,17 +42,20 @@ class Predictor {
 	def projections_k = [:]
 	def projections_flex = [:]
 
-	def positionAtDepth = [
-			projections_qb,
-			projections_rb,
-			projections_rb,
-			projections_wr,
-			projections_wr,
-			projections_te,
-			projections_d,
-			projections_k,
-			projections_flex
-		]
+	/**
+	 * An array of maps that contain the options for positions at each depth.  So, if the
+	 * positionTypes string contains QB,RB,RB then the array will have three elements, at
+	 * 0 will be a map for QBs, and at 1 and 2 will be the map for RBs.
+	 */
+	def positionAtDepth = []
+
+	/**
+	 * The input string (comma-separated) dictating which positions are used.  For example,
+	 * the string might look like QB,RB,RB,WR,WR,TE,DEF,K
+	 */
+	def positionTypes
+
+	def positionTypesAsArray
 
 	def bestPoints = 0
 	def bestRoster = []
@@ -56,16 +63,75 @@ class Predictor {
 	def wr1Index = 0
 	def rb1Index = 0
 
+	/**
+	 * A map that keeps track of which indices in the roster are for each position type.
+	 * The key is the position and value is an array of indices.
+	 */
+	def positionIndices = [:]
+
+	def positionCounter = [:]
+
+	/**
+	 * Keeps track of which player is currently being evaluated at each roster position.
+	 */
+	def indexTracker = []
 
     def tableHits = 0
     def tableMisses = 0
     def tableHitRate = [0,0,0,0,0,0,0,0,0]
 
+	/**
+	 * Keeps track of how much money, at any given point, we have left
+	 * to spend on remaining players to fill the roster.
+	 */
     def budget
-    def minCost = Integer.MAX_VALUE
+
+	/**
+	 * The lowest-priced player at each position.
+	 */
+	def minCost = [:]
+
+	def minTotalCost = []
 
     static def DRAFT_KINGS = "DRAFT_KINGS"
     static def FAN_DUEL = "FAN_DUEL"
+
+	def initializePositionTypes() {
+		projections_flex.putAll(projections_rb)
+		projections_flex.putAll(projections_wr)
+		projections_flex.putAll(projections_te)
+		projections_flex.sort()
+
+		def pieces = positionTypes.split(",")
+
+		positionTypesAsArray = pieces
+
+		pieces.eachWithIndex { position, i ->
+			if(position == "QB")        positionAtDepth << projections_qb
+			else if(position == "RB")   positionAtDepth << projections_rb
+			else if(position == "WR")   positionAtDepth << projections_wr
+			else if(position == "TE")   positionAtDepth << projections_te
+			else if(position == "DEF")  positionAtDepth << projections_d
+			else if(position == "K")    positionAtDepth << projections_k
+			else if(position == "FLEX") positionAtDepth << projections_flex
+
+			// Manage position indices
+			(!positionIndices.containsKey(position)) ? positionIndices[position] = [i] : positionIndices[position] << i
+
+			(!positionCounter.containsKey(position)) ? positionCounter[position] = [0] : positionCounter[position] << 0
+
+			indexTracker << 0
+
+			minTotalCost << 0
+		}
+
+		def costSoFar = 0
+		for(int i=minTotalCost.size()-1; i>= 0; i--) {
+			def minCostAtIndex = minCost[positionTypesAsArray[i]]
+			costSoFar += minCostAtIndex
+			minTotalCost[i] = costSoFar
+		}
+	}
 
 	/**
 	 * Parses the salaries from the salaries CSV into a map keyed by the player name.
@@ -89,9 +155,15 @@ class Predictor {
             def pieces = line.split(",")
             def name = pieces[1].replaceAll("\"", "").replaceAll("\\.", "").replaceAll("null", "").trim().toLowerCase()
             def salary = pieces[2].toInteger()
+	        def position = pieces[0]
+	        if(position == "D" || position == "DST")     position = "DEF"
+	        else if(position.contains("null"))           position.replace("null", "")
 
-            if(salary < minCost)
-                minCost = salary
+	        if(!minCost.containsKey([position]))
+		        minCost[position] = Integer.MAX_VALUE
+
+            if(salary < minCost[position])
+                minCost[position] = salary
 
             if(salaries.containsKey(name)) {
                 println "Salaries already contains ${ name }"
@@ -99,6 +171,22 @@ class Predictor {
             }
             salaries[name] = salary
         }
+
+		// Figure out the smallest FLEX cost
+		def minVal = Integer.MAX_VALUE
+		if(minCost["RB"] < minCost["WR"]) {
+			if(minCost["TE"] < minCost["RB"])
+				minVal = minCost["TE"]
+			else
+				minVal = minCost["RB"]
+		}
+		else {
+			if(minCost["TE"] < minCost["WR"])
+				minVal = minCost["TE"]
+			else
+				minVal = minCost["WR"]
+		}
+		minCost["FLEX"] = minVal
 
 
 		return true
@@ -208,6 +296,53 @@ class Predictor {
 		}
 	}
 
+	/**
+	 * Evaluates the previous roster indices that contain the same position
+	 * to make sure the currently-chosen player is not already in the roster.
+	 *
+	 * @param depth     The current roster index that we're at.
+	 * @param player    The player being considered.
+	 * @param roster    The current roster, minus the player being considered.
+	 * @return          True, if the player name already exists in the roster.  False, otherwise.
+	 */
+	def isDuplicate(depth, player, roster) {
+		def position = positionTypesAsArray[depth]
+		def foundDupe = false
+
+		for(index in positionIndices[position]) {
+			if(index >= depth)
+				break
+
+			if(roster[index] == player) {
+				foundDupe = true
+				break
+			}
+		}
+
+		foundDupe
+	}
+
+	def isCorrectStartingIndex(depth, index) {
+		// Is there a previous roster entry for this position?
+		def position = positionTypesAsArray[depth]
+		def closestIndex = -1
+//		def i=0     // Where in positionIndices are we?
+		for(currIdx in positionIndices[position]) {
+			if(currIdx == depth)
+				break
+			if(currIdx > closestIndex && currIdx < depth) {
+				closestIndex = currIdx
+			}
+		}
+
+		// No previous index, whatever was passed in is fine.
+		if(closestIndex == -1 || indexTracker[closestIndex] < index) {
+			return true
+		}
+
+		return false
+	}
+
 	def generateOptimalTeamRecursion(depth, budget, totalPoints, roster) {
 //		positionAtDepth[depth].eachWithIndex { name,points, i ->
 
@@ -286,16 +421,25 @@ class Predictor {
 		}
 	}
 
+	/**
+	 * Dynamic programming solution for determining the optimal roster.
+	 *
+	 * @param depth
+	 * @param budget
+	 * @param totalPoints
+	 * @param roster
+	 * @return
+	 */
 	def generateOptimalTeamMemoization(depth, budget, totalPoints, roster) {
 
-		if(depth == FLEX) {
+		if(depth == table.items.size()-1) {
 			def bestPointsForFlex = 0
 			def best = null
 
             /*
              * Do we have a pre-computed solution for this budget?
              */
-			def result = table.getSolution(FLEX, budget)
+			def result = table.getSolution(depth, budget)
 			if(result) {
                 tableHits++
                 tableHitRate[depth]++
@@ -311,16 +455,20 @@ class Predictor {
              * No pre-computed solution.  Go through each option and determine the most valuable
              * for the budget provided.
              */
-			for(e in projections_flex) {
+			indexTracker[depth] = 0
+			for(e in positionAtDepth[depth]) {
                 def name = e.key
-                if( (name == roster[1] || name == roster[2] || name == roster[3] || name == roster[4] || name == roster[5]) ) {
-                    continue
+				if(isDuplicate(depth, name, roster) || !isCorrectStartingIndex(depth, indexTracker[depth])) {
+					indexTracker[depth]++
+					continue
                 }
 
-				if(salaries[e.key] <= budget && e.value > bestPointsForFlex) {
+				if(salaries[name] <= budget && e.value > bestPointsForFlex) {
 					bestPointsForFlex = e.value
-					best = e.key
+					best = name
 				}
+
+				indexTracker[depth]++
 			}
 
 			def newItem
@@ -328,7 +476,7 @@ class Predictor {
 				newItem = new MemoItem(cost: budget, points: bestPointsForFlex, roster: [best])
 
 				// Write to table
-				table.writeSolution(FLEX, newItem)
+				table.writeSolution(depth, newItem)
 			}
 
 			return newItem
@@ -346,20 +494,10 @@ class Predictor {
 
             reportTableStats()
 
-            def i=0
+			indexTracker[depth] = 0
             for(e in positionAtDepth[depth]) {
-                /*
-                 * Skip to k+1 index for RB2 and WR2.
-                 */
-                if(depth == 1) {
-                    rb1Index = i
-                }
-                else if(depth == 3) {
-                    wr1Index = i
-                }
-                else if( (depth == 2 && i<= rb1Index) || (depth == 4 && i<= wr1Index) ) {
-//                    println "Skipping ${e.key} at depth ${depth}"
-                    i++
+                if(isDuplicate(depth, e.key, roster) || !isCorrectStartingIndex(depth, indexTracker[depth])) {
+	                indexTracker[depth]++
                     continue
                 }
 
@@ -368,7 +506,7 @@ class Predictor {
                 def points = e.value
                 if(cost <= budget) {
                     result = null
-                    if(budget-cost >= minCost) {
+                    if(budget-cost >= minTotalCost[depth+1]) {
                         roster << e.key
                         result = generateOptimalTeamMemoization(depth+1, budget - cost, totalPoints + points, roster)
                         roster.remove(e.key)
@@ -401,7 +539,7 @@ class Predictor {
                     }
                 }
 
-                i++
+	            indexTracker[depth]++
             }
         }
 	}
@@ -456,12 +594,13 @@ class Predictor {
 	}
 
 	public static void main(String[] args) {
-        if(args.length < 2 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}") || !args[1].matches("\\d+")) {
-            println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS> <budget>"
+        if(args.length < 3 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}") || !args[1].matches("\\d+")) {
+            println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS> <budget> <roster types>"
             return
         }
 
 		def p = new Predictor()
+		p.positionTypes = args[2]
         p.site = (args[0] == FAN_DUEL) ? FAN_DUEL : DRAFT_KINGS
         p.budget = args[1].toInteger()
 
@@ -470,10 +609,9 @@ class Predictor {
 
 		p.readProjections()
 		p.cleanData()
-		p.projections_flex.putAll(p.projections_rb)
-		p.projections_flex.putAll(p.projections_wr)
-		p.projections_flex.putAll(p.projections_te)
-		p.projections_flex.sort()
+
+		p.initializePositionTypes()
+		p.table.initializeItemsList(p.positionTypes)
 
         long start = System.currentTimeMillis()
 //		p.generateOptimalTeamByBruteForce()

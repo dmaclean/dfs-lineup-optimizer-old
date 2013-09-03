@@ -26,60 +26,80 @@ class TestMemoTable{
 
 	@Test
 	void testWriteSolution_FirstItem() {
+		table.initializeItemsList("FLEX")
 		MemoItem item = new MemoItem(cost: 3500, points: 100, roster: ["Dan"])
 
-		table.writeSolution(Predictor.FLEX, item)
+		table.writeSolution(0, item)
 
-		assert table.items[0].size() == 0
-		assert table.items[1].size() == 0
-		assert table.items[2].size() == 0
-		assert table.items[3].size() == 0
-		assert table.items[4].size() == 0
-		assert table.items[5].size() == 0
-		assert table.items[6].size() == 0
-		assert table.items[7].size() == 0
-		assert table.items[8].size() == 1
+		assert table.items[0].size() == 1
 	}
 
 	@Test
 	void testWriteSolution_OverlappingItems_SamePoints() {
+		table.initializeItemsList("FLEX")
 		MemoItem item = new MemoItem(cost: 3500, points: 100, roster: ["Dan"])
-		table.writeSolution(Predictor.FLEX, item)
+		table.writeSolution(0, item)
 
-		assert table.items[Predictor.FLEX].size() == 1
+		assert table.items[0].size() == 1
 
 		MemoItem dupe = new MemoItem(cost: 3500, points: 100, roster: ["Dan"])
-		table.writeSolution(Predictor.FLEX, dupe)
+		table.writeSolution(0, dupe)
 
-		assert table.items[Predictor.FLEX].size() == 1
-        assert table.items[Predictor.FLEX][0].points == 100
+		assert table.items[0].size() == 1
+        assert table.items[0][0].points == 100
 	}
 
 	@Test
 	void testWriteSolution_OverlappingItems_LowerPoints() {
+		table.initializeItemsList("FLEX")
 		MemoItem item = new MemoItem(cost: 3500, points: 100, roster: ["Dan"])
-		table.writeSolution(Predictor.FLEX, item)
+		table.writeSolution(0, item)
 
-        assert table.items[Predictor.FLEX].size() == 1
+        assert table.items[0].size() == 1
 
 		MemoItem dupe = new MemoItem(cost: 3500, points: 90, roster: ["Dan"])
-		table.writeSolution(Predictor.FLEX, dupe)
+		table.writeSolution(0, dupe)
 
-        assert table.items[Predictor.FLEX].size() == 1
-        assert table.items[Predictor.FLEX][0].points == 100
+        assert table.items[0].size() == 1
+        assert table.items[0][0].points == 100
 	}
 
     @Test
     void testWriteSolution_OverlappingItems_HigherPoints() {
+	    table.initializeItemsList("FLEX")
         MemoItem item = new MemoItem(cost: 3500, points: 100, roster: ["Dan"])
-        table.writeSolution(Predictor.FLEX, item)
+        table.writeSolution(0, item)
 
-        assert table.items[Predictor.FLEX].size() == 1
+        assert table.items[0].size() == 1
 
         MemoItem dupe = new MemoItem(cost: 3500, points: 200, roster: ["Dan"])
-        table.writeSolution(Predictor.FLEX, dupe)
+        table.writeSolution(0, dupe)
 
-        assert table.items[Predictor.FLEX].size() == 1
-        assert table.items[Predictor.FLEX][0].points == 200
+        assert table.items[0].size() == 1
+        assert table.items[0][0].points == 200
     }
+
+	@Test
+	void testInitializeItemList_QB() {
+		table.initializeItemsList("QB")
+		assert table.items.size() == 1
+	}
+
+	@Test
+	void testInitializeItemList_QB_RB() {
+		table.initializeItemsList("QB,RB")
+		assert table.items.size() == 2
+	}
+
+	@Test
+	void testInitializeItemList_QB_RB_WR() {
+		table.initializeItemsList("QB,RB,WR")
+		assert table.items.size() == 3
+	}
+
+	@Test
+	void testInitializeItemList_QB_WR_WR_FLEX() {
+		table.initializeItemsList("QB,WR,WR,FLEX")
+		assert table.items.size() == 4
+	}
 }
