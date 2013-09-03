@@ -92,4 +92,77 @@ class TestFanDuelParser {
         assert parser.output[0] == "QB,Drew Brees,9600"
         assert parser.output[1] == "RB,Adrian Peterson,9500"
     }
+
+	@Test
+	void testConvertTeamName() {
+		def teams = [
+		        "Arizona Cardinals",
+				"Atlanta Falcons",
+				"Buffalo Bills",
+				"Carolina Panthers",
+				"Chicago Bears",
+				"Cincinnati Bengals",
+				"Cleveland Browns",
+				"Dallas Cowboys",
+				"Detroit Lions",
+				"Green Bay Packers",
+				"Houston Texans",
+				"Indianapolis Colts",
+				"Jacksonville Jaguars",
+				"Kansas City Chiefs",
+				"Miami Dolphins",
+				"Minnesota Vikings",
+				"New England Patriots",
+				"New Orleans Saints",
+				"New York Giants",
+				"New York Jets",
+				"Oakland Raiders",
+				"Philadelphia Eagles",
+				"Pittsburgh Steelers",
+				"San Diego Chargers",
+				"San Francisco 49ers",
+				"Seattle Seahawks",
+				"St Louis Rams",
+				"Tampa Bay Buccaneers",
+				"Tennessee Titans",
+				"Washington Redskins"
+		]
+
+		def names = [
+				"cardinals",
+				"falcons",
+				"bills",
+				"panthers",
+				"bears",
+				"bengals",
+				"browns",
+				"cowboys",
+				"lions",
+				"packers",
+				"texans",
+				"colts",
+				"jaguars",
+				"chiefs",
+				"dolphins",
+				"vikings",
+				"patriots",
+				"saints",
+				"giants",
+				"jets",
+				"raiders",
+				"eagles",
+				"steelers",
+				"chargers",
+				"49ers",
+				"seahawks",
+				"rams",
+				"buccaneers",
+				"titans",
+				"redskins"
+		]
+
+		for(int i=0; i<teams.size(); i++) {
+			assert parser.convertTeamName(teams[i]) == names[i]
+		}
+	}
 }
