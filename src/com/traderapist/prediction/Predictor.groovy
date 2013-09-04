@@ -97,9 +97,9 @@ class Predictor {
     static def FAN_DUEL = "FAN_DUEL"
 
 	def initializePositionTypes() {
-		projections_flex.putAll(projections_rb)
-		projections_flex.putAll(projections_wr)
-		projections_flex.putAll(projections_te)
+//		projections_flex.putAll(projections_rb)
+//		projections_flex.putAll(projections_wr)
+//		projections_flex.putAll(projections_te)
 		projections_flex.sort()
 
 		def pieces = positionTypes.split(",")
@@ -131,6 +131,67 @@ class Predictor {
 			costSoFar += minCostAtIndex
 			minTotalCost[i] = costSoFar
 		}
+	}
+
+	/**
+	 * Expect input in the form of <name>,<position>,<fantasy points>,<salary>
+	 *
+	 * <tr.*?><td.*?><a.*?>(.*?) \(([A-Z]+), [A-Z]+\)<\/a>.*?(<td class="nf strong">(.*?)<\/td>)<td.*?>.*?<\/td><td>\$(\d+)<\/td>.*?<\/tr>
+	 * \1,\2,\4,\5\n
+	 *
+	 * @param file
+	 * @return
+	 */
+	def readInput(file) {
+		new File(file).eachLine { line ->
+			def pieces = line.split(",")
+
+			def salary = Integer.parseInt(pieces[3])
+			salaries[pieces[0]] = salary
+			if(!minCost.containsKey(pieces[1]))
+				minCost[pieces[1]] = Integer.MAX_VALUE
+
+			if(salary > 0 && salary < minCost[pieces[1]])
+				minCost[pieces[1]] = salary
+
+			if(pieces[1] == "QB") {
+				projections_qb[pieces[0]] = Double.parseDouble(pieces[2])
+			}
+			else if(pieces[1] == "RB") {
+				projections_rb[pieces[0]] = Double.parseDouble(pieces[2])
+				projections_flex[pieces[0]] = Double.parseDouble(pieces[2])
+			}
+			else if(pieces[1] == "WR") {
+				projections_wr[pieces[0]] = Double.parseDouble(pieces[2])
+				projections_flex[pieces[0]] = Double.parseDouble(pieces[2])
+			}
+			else if(pieces[1] == "TE") {
+				projections_te[pieces[0]] = Double.parseDouble(pieces[2])
+				projections_flex[pieces[0]] = Double.parseDouble(pieces[2])
+			}
+			else if(pieces[1] == "DEF") {
+				projections_d[pieces[0]] = Double.parseDouble(pieces[2])
+			}
+			else if(pieces[1] == "K") {
+				projections_k[pieces[0]] = Double.parseDouble(pieces[2])
+			}
+		}
+
+		// Figure out the smallest FLEX cost
+		def minVal = Integer.MAX_VALUE
+		if(minCost["RB"] < minCost["WR"]) {
+			if(minCost["TE"] < minCost["RB"])
+				minVal = minCost["TE"]
+			else
+				minVal = minCost["RB"]
+		}
+		else {
+			if(minCost["TE"] < minCost["WR"])
+				minVal = minCost["TE"]
+			else
+				minVal = minCost["WR"]
+		}
+		minCost["FLEX"] = minVal
 	}
 
 	/**
@@ -526,9 +587,6 @@ class Predictor {
 
                                 printOptimalRoster()
                             }
-                            else {
-                                println "Duplicates in roster.  Throwing it away."
-                            }
                         }
 
                         if(result) {
@@ -604,11 +662,7 @@ class Predictor {
         p.site = (args[0] == FAN_DUEL) ? FAN_DUEL : DRAFT_KINGS
         p.budget = args[1].toInteger()
 
-		if(!p.readSalaries())
-			return
-
-		p.readProjections()
-		p.cleanData()
+		p.site == FAN_DUEL ? p.readInput("data/numberfire/fanduel.csv") : p.readInput("data/numberfire/draftkings.csv")
 
 		p.initializePositionTypes()
 		p.table.initializeItemsList(p.positionTypes)
