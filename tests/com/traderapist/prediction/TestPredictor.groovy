@@ -26,47 +26,34 @@ class TestPredictor {
 
 	@Test
 	void testInitializePositionTypes_QB_RB() {
-		predictor.projections_qb["Tom Brady"] = 20
-		predictor.projections_qb["Aaron Rodgers"] = 25
-
-		predictor.projections_rb["Adrian Peterson"] = 22
-		predictor.projections_rb["Doug Martin"] = 18
-
 		predictor.positionTypes = "QB,RB"
 
+		predictor.readInput("data/test/test_initialize_1.csv")
 		predictor.initializePositionTypes()
 
-		assert predictor.positionAtDepth[0]["Tom Brady"] == 20
-		assert predictor.positionAtDepth[0]["Aaron Rodgers"] == 25
-		assert predictor.positionAtDepth[1]["Adrian Peterson"] == 22
-		assert predictor.positionAtDepth[1]["Doug Martin"] == 18
+		assert predictor.positionAtDepth[0]["Tom Brady"] == 20.09
+		assert predictor.positionAtDepth[0]["Aaron Rodgers"] == 19.61
+		assert predictor.positionAtDepth[1]["Adrian Peterson"] == 21.16
+		assert predictor.positionAtDepth[1]["Doug Martin"] == 13.51
 	}
 
 	@Test
 	void testInitializePositionTypes_QB_RB_WR_FLEX() {
-		predictor.projections_qb["Tom Brady"] = 20
-		predictor.projections_qb["Aaron Rodgers"] = 25
-
-		predictor.projections_rb["Adrian Peterson"] = 22
-		predictor.projections_rb["Doug Martin"] = 18
-
-		predictor.projections_wr["Calvin Johnson"] = 15
-		predictor.projections_wr["A.J. Green"] = 10
-
 		predictor.positionTypes = "QB,RB,WR,FLEX"
 
+		predictor.readInput("data/test/test_initialize_2.csv")
 		predictor.initializePositionTypes()
 
-		assert predictor.positionAtDepth[0]["Tom Brady"] == 20
-		assert predictor.positionAtDepth[0]["Aaron Rodgers"] == 25
-		assert predictor.positionAtDepth[1]["Adrian Peterson"] == 22
-		assert predictor.positionAtDepth[1]["Doug Martin"] == 18
-		assert predictor.positionAtDepth[2]["Calvin Johnson"] == 15
-		assert predictor.positionAtDepth[2]["A.J. Green"] == 10
-		assert predictor.positionAtDepth[3]["Adrian Peterson"] == 22
-		assert predictor.positionAtDepth[3]["Doug Martin"] == 18
-		assert predictor.positionAtDepth[3]["Calvin Johnson"] == 15
-		assert predictor.positionAtDepth[3]["A.J. Green"] == 10
+		assert predictor.positionAtDepth[0]["Tom Brady"] == 20.09
+		assert predictor.positionAtDepth[0]["Aaron Rodgers"] == 19.61
+		assert predictor.positionAtDepth[1]["Adrian Peterson"] == 21.16
+		assert predictor.positionAtDepth[1]["Doug Martin"] == 13.51
+		assert predictor.positionAtDepth[2]["Calvin Johnson"] == 14.27
+		assert predictor.positionAtDepth[2]["A.J. Green"] == 10.83
+		assert predictor.positionAtDepth[3]["Adrian Peterson"] == 21.16
+		assert predictor.positionAtDepth[3]["Doug Martin"] == 13.51
+		assert predictor.positionAtDepth[3]["Calvin Johnson"] == 14.27
+		assert predictor.positionAtDepth[3]["A.J. Green"] == 10.83
 	}
 
 	@Test
@@ -99,6 +86,8 @@ class TestPredictor {
 	@Test
 	void testInitializePositionTypes() {
 		predictor.positionTypes = "QB,RB,RB,WR,WR,TE,DEF,K,FLEX"
+
+		predictor.readInput("data/test/test_initialize_2.csv")
 		predictor.initializePositionTypes()
 
 		assert predictor.positionIndices["QB"].size() == 1 && predictor.positionIndices["QB"][0] == 0
@@ -113,6 +102,8 @@ class TestPredictor {
 	@Test
 	void testIsDuplicate() {
 		predictor.positionTypes = "QB,RB,RB,WR,WR,TE,DEF,K,FLEX"
+
+		predictor.readInput("data/test/test_initialize_2.csv")
 		predictor.initializePositionTypes()
 
 		assert predictor.isDuplicate(2, "adrian peterson", ["aaron rodgers", "adrian peterson"])
@@ -122,6 +113,8 @@ class TestPredictor {
 	@Test
 	void testIsDuplicate_3OfSamePosition() {
 		predictor.positionTypes = "QB,RB,RB,RB,WR,TE,DEF,K,FLEX"
+
+		predictor.readInput("data/test/test_initialize_2.csv")
 		predictor.initializePositionTypes()
 
 		assert predictor.isDuplicate(3, "adrian peterson", ["aaron rodgers", "cj spiller", "adrian peterson"])
@@ -131,6 +124,8 @@ class TestPredictor {
 	@Test
 	void testIsDuplicate_1OfPosition() {
 		predictor.positionTypes = "QB,RB,RB,RB,WR,TE,DEF,K,FLEX"
+
+		predictor.readInput("data/test/test_initialize_2.csv")
 		predictor.initializePositionTypes()
 
 		assert !predictor.isDuplicate(0, "tom brady", [])
@@ -139,20 +134,22 @@ class TestPredictor {
 	@Test
 	void testIsCorrectStartingIndex() {
 		predictor.positionTypes = "QB,RB,RB,RB,WR,TE,DEF,K,FLEX"
+
+		predictor.readInput("data/test/test_correct_starting_index.csv")
 		predictor.initializePositionTypes()
 
 		// Single Quarterback
 		assert predictor.isCorrectStartingIndex(0,0) == true
 
-		predictor.positionCounter["QB"][0] = 10
+		predictor.indexTracker[0] = 10
 		assert predictor.isCorrectStartingIndex(0,10) == true
 
 		// Set 1st RB to 10 so 2nd should start at 11
-		predictor.positionCounter["RB"][0] = 10
+		predictor.indexTracker[1] = 10
 		assert predictor.isCorrectStartingIndex(2,11) == true
 
 		// Set 2nd RB to 20 so 3rd should start at 21
-		predictor.positionCounter["RB"][1] = 20
+		predictor.indexTracker[2] = 20
 		assert predictor.isCorrectStartingIndex(3, 20) == false
 		assert predictor.isCorrectStartingIndex(3, 21) == true
 	}
