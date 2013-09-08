@@ -75,7 +75,7 @@ class BaseballPredictor {
 
     def tableHits = 0
     def tableMisses = 0
-    def tableHitRate = [0,0,0,0,0,0,0,0,0]
+    def tableHitRate = []
 
 	/**
 	 * Keeps track of how much money, at any given point, we have left
@@ -110,6 +110,8 @@ class BaseballPredictor {
 			indexTracker << 0
 
 			minTotalCost << 0
+
+			tableHitRate << 0
 		}
 
 		def costSoFar = 0
@@ -146,6 +148,9 @@ class BaseballPredictor {
 			 * Grab the salary and figure out if this is the lowest value for this position.
 			 */
 			def salary = Integer.parseInt(pieces[3])
+			if(salary == 0)
+				return
+
 			salaries[name] = salary
 			if(!minCost.containsKey(pieces[1]))
 				minCost[pieces[1]] = Integer.MAX_VALUE
@@ -153,10 +158,16 @@ class BaseballPredictor {
 			if(salary > 0 && salary < minCost[pieces[1]])
 				minCost[pieces[1]] = salary
 
+			/*
+			 * Check if the map of projections for this position exists, and if not, create it.
+			 */
 			if(!projections.containsKey(pieces[1]))
 				projections[pieces[1]] = [:]
 			projections[pieces[1]][name] = Double.parseDouble(pieces[2])
 
+			/*
+			 * For football, add RB, WR, and TEs to the flex position.
+			 */
 			if(sport == SPORT_FOOTBALL && pieces[1].matches("RB|WR|TE"))
 				projections["FLEX"][name] = Double.parseDouble(pieces[2])
 		}
@@ -164,6 +175,69 @@ class BaseballPredictor {
 		// Figure out the smallest FLEX cost
 		if(sport == SPORT_FOOTBALL)
 			minCost["FLEX"] = Math.min(minCost["RB"], Math.min(minCost["WR"], minCost["TE"]))
+	}
+
+	/**
+	 * Expect input in the form of <name>,<position>,<fantasy points>,<salary>
+	 *
+	 * FOOTBALL
+	 * <tr.*?><td.*?><a.*?>(.*?) \(([A-Z]+), [A-Z]+\)<\/a>.*?(<td class="nf strong">(.*?)<\/td>)<td.*?>.*?<\/td><td>\$(\d+)<\/td>.*?<\/tr>
+	 * \1,\2,\4,\5\n
+	 *
+	 * BASEBALL
+	 * <tr.*?><td.*?>\*?<a.*?>(.*?) \(([\d\/A-Z]+), [A-Z]+\)<\/a><\/td>(<td.*?>[\d\.]+<\/td>){0,13}<td class="sep">([\d\.]+)<\/td><td>\$(\d+)<\/td>.*?<\/tr>
+	 * \1,\2,\4,\5\n
+	 *
+	 * @param file
+	 * @return
+	 */
+	def readInputBaseball(file) {
+		new File(file).eachLine { line ->
+			def pieces = line.split(",")
+			def name = pieces[0]
+
+			/*
+			 * Grab the salary and figure out if this is the lowest value for this position.
+			 */
+			def salary = Integer.parseInt(pieces[3])
+			if(salary == 0)
+				return
+
+			/*
+			 * For baseball, we need to separate players that have two different positions
+			 * listed, such as 2B/RF.
+			 */
+			def positions = pieces[1]
+			if(pieces[1].indexOf("/") > -1) {
+				positions = pieces[1].split("/")
+			}
+			else {
+				positions = [positions]
+			}
+
+			for(position in positions) {
+				if(position.matches("LF|CF|RF")) {
+					position = "OF"
+				}
+				else if(position.matches("SP|RP")) {
+					position = "P"
+				}
+
+				salaries[name] = salary
+				if(!minCost.containsKey(position))
+					minCost[position] = Integer.MAX_VALUE
+
+				if(salary > 0 && salary < minCost[position])
+					minCost[position] = salary
+
+				/*
+				 * Check if the map of projections for this position exists, and if not, create it.
+				 */
+				if(!projections.containsKey(position))
+					projections[position] = [:]
+				projections[position][name] = Double.parseDouble(pieces[2])
+			}
+		}
 	}
 
     def reportTableStats() {
@@ -194,20 +268,30 @@ class BaseballPredictor {
 	 * @return          True, if the player name already exists in the roster.  False, otherwise.
 	 */
 	def isDuplicate(depth, player, roster) {
-		def position = positionTypesAsArray[depth]
-		def foundDupe = false
+		if(sport == SPORT_FOOTBALL) {
+			def position = positionTypesAsArray[depth]
+			def foundDupe = false
 
-		for(index in positionIndices[position]) {
-			if(index >= depth)
-				break
+			for(index in positionIndices[position]) {
+				if(index >= depth)
+					break
 
-			if(roster[index] == player) {
-				foundDupe = true
-				break
+				if(roster[index] == player) {
+					foundDupe = true
+					break
+				}
 			}
-		}
 
-		foundDupe
+			return foundDupe
+		}
+		else {
+			for(currPlayer in roster) {
+				if(player == currPlayer)
+					return true
+			}
+
+			return false
+		}
 	}
 
 	def isCorrectStartingIndex(depth, index) {
@@ -359,7 +443,10 @@ class BaseballPredictor {
 
 		def p = new BaseballPredictor(site: args[0], budget: args[1].toInteger(), positionTypes: args[2], sport: args[3])
 
-		p.readInput("data/numberfire/${args[0]}_${args[3]}.csv")
+		if(p.sport == BaseballPredictor.SPORT_FOOTBALL)
+			p.readInput("data/numberfire/${args[0]}_${args[3]}.csv")
+		else if(p.sport == BaseballPredictor.SPORT_BASEBALL)
+			p.readInputBaseball("data/numberfire/${args[0]}_${args[3]}.csv")
 
 		p.initializePositionTypes()
 		p.table.initializeItemsList(p.positionTypes)
