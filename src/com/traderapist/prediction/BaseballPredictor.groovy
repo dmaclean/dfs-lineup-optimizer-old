@@ -251,11 +251,24 @@ class BaseballPredictor {
         }
     }
 
+	/**
+	 * Print out the current best roster configuration to the console.
+	 */
     def printOptimalRoster() {
         println "Found best configuration so far with ${ bestPoints } for the following players:"
         def sal = 0
-        bestRoster.each { p -> println "\t${ p } (${ salaries[p] })"; sal += salaries[p] }
-        println "\tTotal salary: ${sal}"
+        bestRoster.each { p ->
+	        def points = 0
+	        projections.each { k,v ->
+		        if(v[p]) {
+			        points = v[p]
+		        }
+	        }
+
+	        println "\t${ p } (${ salaries[p] } - ${ points })"
+	        sal += salaries[p]
+        }
+        println "==========================\n\tTotal salary: ${sal}"
     }
 
 	/**
