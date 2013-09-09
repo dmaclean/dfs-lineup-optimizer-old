@@ -21,6 +21,9 @@ class BaseballPredictor {
 	 */
 	def sport
 
+	/**
+	 * Our lookup table.
+	 */
     def table = new MemoTable()
 
 	/**
@@ -57,9 +60,19 @@ class BaseballPredictor {
 	 */
 	def positionTypes
 
+	/**
+	 * The variable positionTypes as an array.
+	 */
 	def positionTypesAsArray
 
+	/**
+	 * The best point total encountered so far for all roster configurations.
+	 */
 	def bestPoints = 0
+
+	/**
+	 * The roster of players that comprise the optimal lineup so far.
+	 */
 	def bestRoster = []
 
 	/**
@@ -73,6 +86,10 @@ class BaseballPredictor {
 	 */
 	def indexTracker = []
 
+	/**
+	 * Variables to keep statistics for our lookup table.  The tableHitRate array helps keep track
+	 * of the percentage of all table hits that are encountered at each depth.
+	 */
     def tableHits = 0
     def tableMisses = 0
     def tableHitRate = []
