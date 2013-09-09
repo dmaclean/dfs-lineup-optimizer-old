@@ -163,39 +163,39 @@ Jed Collins,RB,0.34,3000
 Anthony Sherman,RB,0.33,3000
 Dorin Dickerson,RB,0.30,3000
 Erik Lorig,RB,0.25,3000
-Quinn Johnson,RB,0.25,3000
 LeRon McClain,RB,0.19,3000
 Theo Riddick,RB,0.18,3000
 Marcus Thigpen,RB,0.18,3000
 Tommy Bohanon,RB,0.17,3000
 Terrance Ganaway,RB,0.17,3000
-Lance Dunbar,RB,0.15,3000
 Jeremy Stewart,RB,0.15,3000
-Will Johnson,RB,0.14,3000
+Kyle Juszczyk,RB,0.14,3000
 LeGarrette Blount,RB,0.14,3000
 Darius Reynaud,RB,0.14,3000
 Cedric Peerman,RB,0.14,3000
-Kyle Juszczyk,RB,0.14,3000
+Will Johnson,RB,0.14,3000
+Chris Thompson,RB,0.13,3000
 Spencer Ware,RB,0.13,3000
 Tyler Clutts,RB,0.13,3000
-Chris Thompson,RB,0.13,3000
 Anthony Dixon,RB,0.11,3000
 Jordan Todman,RB,0.10,3000
 Cyrus Gray,RB,0.08,3000
 Travaris Cadet,RB,0.06,3000
 Matt Asiata,RB,0.06,3000
 Armond Smith,RB,0.02,3000
-John Conner,RB,0.02,3000
 Will Ta'ufo'ou,RB,0.02,3000
 Antone Smith,RB,0.02,3000
+John Conner,RB,0.02,3000
 Kenjon Barner,RB,0.00,3000
+Le'Veon Bell,RB,0.00,5600
+Lance Dunbar,RB,0.00,3000
 Jonathan Stewart,RB,0.00,4300
-LaMichael James,RB,0.00,3300
 Andre Brown,RB,0.00,4100
+Quinn Johnson,RB,0.00,3000
 Mike Goodson,RB,0.00,3000
 Jerome Felton,RB,0.00,3000
 Bernard Scott,RB,0.00,3000
-Le'Veon Bell,RB,0.00,5600
+LaMichael James,RB,0.00,3300
 Calvin Johnson,WR,14.27,9400
 Victor Cruz,WR,13.57,7000
 Roddy White,WR,12.81,8100
@@ -261,11 +261,9 @@ Riley Cooper,WR,4.98,4100
 Santana Moss,WR,4.63,3000
 T.J. Graham,WR,4.44,3000
 Jacoby Ford,WR,4.43,3000
-Michael Floyd,WR,4.39,4500
-Brandon Stokley,WR,4.18,3000
+Michael Floyd,WR,4.39,4500,4500
 Stephen Hill,WR,4.17,3100
 Brian Quick,WR,4.15,3000
-Aaron Dobson,WR,4.15,3300
 Jacoby Jones,WR,4.04,3000
 Jeremy Kerley,WR,4.03,3300
 Julian Edelman,WR,3.99,3000
@@ -287,8 +285,8 @@ Eddie Royal,WR,2.50,3000
 Keenan Allen,WR,2.13,3000
 Jarius Wright,WR,1.83,3000
 Justin Hunter,WR,1.48,3000
-Aldrick Robinson,WR,1.41,3000
 Denard Robinson,WR,1.41,3000
+Aldrick Robinson,WR,1.41,3000
 Damaris Johnson,WR,1.30,3000
 Jerome Simpson,WR,1.27,3000
 DeVier Posey,WR,1.12,3000
@@ -300,15 +298,15 @@ Josh Boyce,WR,0.84,3000
 Austin Pettis,WR,0.83,3000
 Lestar Jean,WR,0.80,3000
 Ricardo Lockette,WR,0.80,3000
-Quinton Patton,WR,0.80,3000
 Chad Hall,WR,0.80,3000
+Quinton Patton,WR,0.80,3000
 Michael Preston,WR,0.78,3000
 Armanti Edwards,WR,0.76,3000
 Ryan Swope,WR,0.76,3000
 Drew Davis,WR,0.75,3000
 Marquess Wilson,WR,0.73,3000
 Kris Durham,WR,0.71,3000
-Ted Ginn Jr.,WR,0.71,30000
+Ted Ginn Jr.,WR,0.71,3000
 Brice Butler,WR,0.67,3000
 Travis Benjamin,WR,0.67,3000
 Aaron Mellette,WR,0.62,3000
@@ -337,20 +335,21 @@ Deonte Thompson,WR,0.35,3000
 Steve Smith,WR,0.35,3000
 Jerrel Jernigan,WR,0.34,3000
 Jordan White,WR,0.32,3000
-Trindon Holliday,WR,0.32,3000
 Keshawn Martin,WR,0.32,3000
+Trindon Holliday,WR,0.32,3000
 Dane Sanzenbacher,WR,0.25,3000
 LaRon Byrd,WR,0.24,3000
 Toney Clemons,WR,0.22,3000
 Niles Paul,WR,0.12,3000
 Isaiah Stanback,WR,0.07,3000
+Aaron Dobson,WR,0.00,3300
 Kevin Cone,WR,0.00,3000
+Nathan Palmer,WR,0.00,3000
 Kevin Walter,WR,0.00,3000
 Andrew Hawkins,WR,0.00,3300
 Greg Childs,WR,0.00,3000
 Plaxico Burress,WR,0.00,3000
 Mario Manningham,WR,0.00,3000
-Nathan Palmer,WR,0.00,3000
 Jimmy Graham,TE,10.71,7200
 Jason Witten,TE,10.02,6000
 Tony Gonzalez,TE,9.43,6000
@@ -366,7 +365,6 @@ Fred Davis,TE,5.23,3400
 Zach Sudfeld,TE,5.22,3000
 Jared Cook,TE,5.05,3800
 Vernon Davis,TE,5.03,4700
-Marcedes Lewis,TE,4.86,3600
 Brent Celek,TE,4.65,4200
 Jermichael Finley,TE,4.63,4400
 Brandon Pettigrew,TE,4.54,4200
@@ -380,6 +378,7 @@ Julius Thomas,TE,3.35,3100
 Zach Miller,TE,3.24,3100
 Coby Fleener,TE,3.17,3100
 Jeff Cumberland,TE,3.07,3500
+Allen Reisner,TE,3.06,3000
 Tyler Eifert,TE,2.97,3500
 Kory Sperry,TE,2.82,3000
 Gavin Escobar,TE,2.54,3000
@@ -389,12 +388,10 @@ Craig Stevens,TE,2.14,3000
 Vance McDonald,TE,2.13,3000
 Zach Ertz,TE,2.03,3700
 Ben Hartsock,TE,1.95,3000
-David Ausberry,TE,1.89,3000
 Andrew Quarless,TE,1.82,3000
 Benjamin Watson,TE,1.81,3000
 Luke Stocker,TE,1.79,3300
 Chase Coffman,TE,1.75,3000
-Allen Reisner,TE,1.52,3000
 David Paulson,TE,1.47,3000
 Garrett Graham,TE,1.42,3000
 Lee Smith,TE,0.96,3000
@@ -410,8 +407,8 @@ Michael Egnew,TE,0.34,3000
 Mychal Rivera,TE,0.30,3000
 Nick Kasa,TE,0.30,3000
 D.C. Jefferson,TE,0.28,3000
-Chris Gragg,TE,0.27,3000
 Levine Toilolo,TE,0.27,3000
+Chris Gragg,TE,0.27,3000
 Jordan Reed,TE,0.26,3000
 Ryan Taylor,TE,0.23,3000
 Gary Barnidge,TE,0.23,3000
@@ -421,7 +418,6 @@ Luke Willson,TE,0.17,3000
 Ladarius Green,TE,0.15,3000
 Nate Byham,TE,0.14,3000
 Kevin Brock,TE,0.13,3000
-Adrien Robinson,TE,0.12,3000
 James Hanna,TE,0.10,3000
 Orson Charles,TE,0.10,3000
 Jim Dray,TE,0.09,3000
@@ -431,11 +427,14 @@ Rhett Ellison,TE,0.04,3000
 Taylor Thompson,TE,0.03,3000
 Tommy Gallarda,TE,0.02,3000
 Weslye Saunders,TE,0.02,3000
+Adrien Robinson,TE,0.00,3000
+David Ausberry,TE,0.00,3000
 Rob Housler,TE,0.00,3500
 Richie Brockel,TE,0.00,3000
 Tom Crabtree,TE,0.00,3000
 Rob Gronkowski,TE,0.00,6300
 Matt Spaeth,TE,0.00,3500
+Marcedes Lewis,TE,0.00,3600
 Joel Dreessen,TE,0.00,3000
 Matt Bryant,K,9.23,3800
 Blair Walsh,K,9.22,3900
@@ -474,7 +473,6 @@ Chicago D/ST,DEF,12.51,4900
 Cincinnati D/ST,DEF,11.99,4000
 Miami D/ST,DEF,11.16,3100
 Washington D/ST,DEF,10.86,4200
-Denver D/ST,DEF,10.69,4500
 Kansas City D/ST,DEF,10.45,3300
 Arizona D/ST,DEF,10.43,4500
 Jacksonville D/ST,DEF,10.37,3000
@@ -489,7 +487,6 @@ New Orleans D/ST,DEF,7.62,3700
 Atlanta D/ST,DEF,7.58,3400
 New York Giants D/ST,DEF,7.47,3800
 Oakland D/ST,DEF,7.26,3000
-Baltimore D/ST,DEF,6.49,4500
 San Francisco D/ST,DEF,6.47,4500
 San Diego D/ST,DEF,5.88,3800
 Seattle D/ST,DEF,5.80,4700
