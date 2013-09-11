@@ -187,4 +187,16 @@ class TestBaseballPredictor {
 		assert predictor.projections["2B"].size() == 1
 		assert predictor.projections["OF"].size() == 1
 	}
+
+	@Test
+	void testReadInput_Baseball_DH_to_1B() {
+		predictor.positionTypes = "P,2B,1B"
+		predictor.sport = BaseballPredictor.SPORT_BASEBALL
+
+		predictor.readInputBaseball("data/test/test_baseball_dh.csv")
+
+		assert predictor.projections["P"].size() == 3
+		assert predictor.projections["2B"].size() == 1
+		assert predictor.projections["1B"].size() == 2
+	}
 }

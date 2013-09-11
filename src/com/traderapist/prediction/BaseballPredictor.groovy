@@ -73,7 +73,7 @@ class BaseballPredictor {
 	/**
 	 * The roster of players that comprise the optimal lineup so far.
 	 */
-	def bestRoster = []
+	def bestRosters = []
 
 	/**
 	 * A map that keeps track of which indices in the roster are for each position type.
@@ -236,6 +236,9 @@ class BaseballPredictor {
 				if(position.matches("LF|CF|RF")) {
 					position = "OF"
 				}
+				else if(position.matches("DH")) {
+					position = "1B"
+				}
 				else if(position.matches("SP|RP")) {
 					position = "P"
 				}
@@ -274,18 +277,15 @@ class BaseballPredictor {
     def printOptimalRoster() {
         println "Found best configuration so far with ${ bestPoints } for the following players:"
         def sal = 0
-        bestRoster.each { p ->
-	        def points = 0
-	        projections.each { k,v ->
-		        if(v[p]) {
-			        points = v[p]
-		        }
-	        }
 
-	        println "\t${ p } (${ salaries[p] } - ${ points })"
-	        sal += salaries[p]
-        }
-        println "==========================\n\tTotal salary: ${sal}"
+	    bestRosters.each { roster ->
+		    roster.eachWithIndex { p, i ->
+			    def points = projections[positionTypesAsArray[i]][p]
+			    println "\t${ p } (${ salaries[p] } - ${ points })"
+			    sal += salaries[p]
+		    }
+		    println "==========================\n\tTotal salary: ${sal}"
+	    }
     }
 
 	/**
@@ -445,11 +445,19 @@ class BaseballPredictor {
 
                             if(set.size() == newRoster.size()) {
                                 bestPoints = totalPoints + e.value + result.points
-                                bestRoster.clear()
-                                bestRoster = newRoster
-
-                                printOptimalRoster()
+                                bestRosters = [newRoster]
                             }
+                        }
+	                    else if(result && totalPoints + e.value + result.points == bestPoints) {
+	                        def newRoster = []
+	                        newRoster.addAll(roster)
+	                        newRoster.add(e.key)
+	                        newRoster.addAll(result.roster)
+	                        Set set = new HashSet(newRoster)
+
+	                        if(set.size() == newRoster.size()) {
+		                        bestRosters << newRoster
+	                        }
                         }
 
                         if(result) {
