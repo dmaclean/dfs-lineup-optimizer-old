@@ -16,7 +16,7 @@ class TestPredictor {
 
 	@Before
 	void setUp() {
-		predictor = new Predictor()
+		predictor = new Predictor(sport: Predictor.SPORT_FOOTBALL)
 	}
 
 	@After
@@ -25,23 +25,10 @@ class TestPredictor {
 	}
 
 	@Test
-	void testInitializePositionTypes_QB_RB() {
-		predictor.positionTypes = "QB,RB"
-
-		predictor.readInput("data/test/test_initialize_1.csv")
-		predictor.initializePositionTypes()
-
-		assert predictor.positionAtDepth[0]["Tom Brady"] == 20.09
-		assert predictor.positionAtDepth[0]["Aaron Rodgers"] == 19.61
-		assert predictor.positionAtDepth[1]["Adrian Peterson"] == 21.16
-		assert predictor.positionAtDepth[1]["Doug Martin"] == 13.51
-	}
-
-	@Test
 	void testInitializePositionTypes_QB_RB_WR_FLEX() {
 		predictor.positionTypes = "QB,RB,WR,FLEX"
 
-		predictor.readInput("data/test/test_initialize_2.csv")
+		predictor.readInputFootball("data/test/test_initialize_2.csv")
 		predictor.initializePositionTypes()
 
 		assert predictor.positionAtDepth[0]["Tom Brady"] == 20.09
@@ -57,37 +44,10 @@ class TestPredictor {
 	}
 
 	@Test
-	void testCleanData() {
-		predictor.site = Predictor.DRAFT_KINGS
-
-		// Demaryius Thomas not in salaries
-		predictor.readSalaries()
-
-		// Kevin Boss not in projections
-		predictor.readProjections()
-
-		// Make sure DT is in projections and KB is in salaries prior to cleanup
-		assert predictor.projections_wr["demaryius thomas"]
-		assert predictor.salaries["kevin boss"]
-
-		// As a sanity check, make sure Aaron Rodgers exists in both (he should)
-		assert predictor.projections_qb["aaron rodgers"]
-		assert predictor.salaries["aaron rodgers"]
-
-		predictor.cleanData()
-
-		assert !predictor.projections_wr["demaryius thomas"]
-		assert !predictor.salaries["kevin boss"]
-
-		assert predictor.projections_qb["aaron rodgers"]
-		assert predictor.salaries["aaron rodgers"]
-	}
-
-	@Test
 	void testInitializePositionTypes() {
 		predictor.positionTypes = "QB,RB,RB,WR,WR,TE,DEF,K,FLEX"
 
-		predictor.readInput("data/test/test_initialize_2.csv")
+		predictor.readInputFootball("data/test/test_initialize_2.csv")
 		predictor.initializePositionTypes()
 
 		assert predictor.positionIndices["QB"].size() == 1 && predictor.positionIndices["QB"][0] == 0
@@ -103,7 +63,7 @@ class TestPredictor {
 	void testIsDuplicate() {
 		predictor.positionTypes = "QB,RB,RB,WR,WR,TE,DEF,K,FLEX"
 
-		predictor.readInput("data/test/test_initialize_2.csv")
+		predictor.readInputFootball("data/test/test_initialize_2.csv")
 		predictor.initializePositionTypes()
 
 		assert predictor.isDuplicate(2, "adrian peterson", ["aaron rodgers", "adrian peterson"])
@@ -114,7 +74,7 @@ class TestPredictor {
 	void testIsDuplicate_3OfSamePosition() {
 		predictor.positionTypes = "QB,RB,RB,RB,WR,TE,DEF,K,FLEX"
 
-		predictor.readInput("data/test/test_initialize_2.csv")
+		predictor.readInputFootball("data/test/test_initialize_2.csv")
 		predictor.initializePositionTypes()
 
 		assert predictor.isDuplicate(3, "adrian peterson", ["aaron rodgers", "cj spiller", "adrian peterson"])
@@ -125,17 +85,27 @@ class TestPredictor {
 	void testIsDuplicate_1OfPosition() {
 		predictor.positionTypes = "QB,RB,RB,RB,WR,TE,DEF,K,FLEX"
 
-		predictor.readInput("data/test/test_initialize_2.csv")
+		predictor.readInputFootball("data/test/test_initialize_2.csv")
 		predictor.initializePositionTypes()
 
 		assert !predictor.isDuplicate(0, "tom brady", [])
 	}
 
 	@Test
+	void testIsDuplicate_RB_FLEX() {
+		predictor.positionTypes = "RB,FLEX"
+
+		predictor.readInputFootball("data/test/test_initialize_2.csv")
+		predictor.initializePositionTypes()
+
+		assert !predictor.isDuplicate(1, "calvin johnson", ["calvin johnson"])
+	}
+
+	@Test
 	void testIsCorrectStartingIndex() {
 		predictor.positionTypes = "QB,RB,RB,RB,WR,TE,DEF,K,FLEX"
 
-		predictor.readInput("data/test/test_correct_starting_index.csv")
+		predictor.readInputFootball("data/test/test_correct_starting_index.csv")
 		predictor.initializePositionTypes()
 
 		// Single Quarterback
