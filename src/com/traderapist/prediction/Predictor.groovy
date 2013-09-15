@@ -13,6 +13,15 @@ class Predictor {
 	def site
 
 	/**
+	 * The service we are getting projections from.
+	 *
+	 * - NumberFire
+	 * - MyFantasyAssistant
+	 * - DailyFantasyProjections
+	 */
+	def projectionSource
+
+	/**
 	 * Which sport are we predicting for?
 	 *
 	 * - baseball
@@ -527,12 +536,14 @@ class Predictor {
 	}
 
 	public static void main(String[] args) {
-		if(args.length < 4 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${DRAFT_STREET}") || !args[1].matches("\\d+") || !args[3].matches("baseball|football")) {
-			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS> <budget> <roster types> <baseball|football>"
+		if(args.length < 4 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${DRAFT_STREET}") ||
+				!args[1].matches("NumberFire|MyFantasyAssistant|DailyFantasyProjections") ||
+				!args[2].matches("\\d+") || !args[4].matches("baseball|football")) {
+			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS> <NumberFire|MyFantasyAssistant|DailyFantasyProjections> <budget> <roster types> <baseball|football>"
 			return
 		}
 
-		def p = new Predictor(site: args[0], budget: args[1].toInteger(), positionTypes: args[2], sport: args[3])
+		def p = new Predictor(site: args[0], projectionSource: args[1], budget: args[2].toInteger(), positionTypes: args[3], sport: args[4])
 
 		p.run()
 	}
