@@ -535,13 +535,19 @@ class Predictor {
 		printOptimalRoster()
 	}
 
-	public static void main(String[] args) {
-		if(args.length < 4 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${DRAFT_STREET}") ||
+	static def validateInputs(args) {
+		if(args.length < 5 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${DRAFT_STREET}") ||
 				!args[1].matches("NumberFire|MyFantasyAssistant|DailyFantasyProjections") ||
 				!args[2].matches("\\d+") || !args[4].matches("baseball|football")) {
-			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS> <NumberFire|MyFantasyAssistant|DailyFantasyProjections> <budget> <roster types> <baseball|football>"
-			return
+			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|DRAFT_STREET> <NumberFire|MyFantasyAssistant|DailyFantasyProjections> <budget> <roster types> <baseball|football>"
+			return false
 		}
+
+		return true
+	}
+
+	public static void main(String[] args) {
+		Predictor.validateInputs(args)
 
 		def p = new Predictor(site: args[0], projectionSource: args[1], budget: args[2].toInteger(), positionTypes: args[3], sport: args[4])
 

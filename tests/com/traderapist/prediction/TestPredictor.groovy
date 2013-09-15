@@ -142,4 +142,52 @@ class TestPredictor {
 		assert predictor.normalizeBaseballPosition("OF") == "OF"
 		assert predictor.normalizeBaseballPosition("DH") == "1B"
 	}
+
+	@Test
+	void testValidateInputs() {
+		def args = new String[4]
+
+		// bad length
+		assert !predictor.validateInputs(args)
+
+		// Site
+		args = ["Bad site", "NumberFire", "35000", "QB,RB,RB,WR,WR", Predictor.SPORT_FOOTBALL].toArray()
+		assert !predictor.validateInputs(args)
+
+		args[0] = Predictor.DRAFT_KINGS
+		assert predictor.validateInputs(args)
+		args[0] = Predictor.DRAFT_STREET
+		assert predictor.validateInputs(args)
+		args[0] = Predictor.FAN_DUEL
+		assert predictor.validateInputs(args)
+
+		// Projection source
+		args[1] = "Bad source"
+		assert !predictor.validateInputs(args)
+
+		args[1] = "NumberFire"
+		assert predictor.validateInputs(args)
+		args[1] = "MyFantasyAssistant"
+		assert predictor.validateInputs(args)
+		args[1] = "DailyFantasyProjections"
+		assert predictor.validateInputs(args)
+
+		// Budget
+		args[2] = "This shouldn't be a string"
+		assert !predictor.validateInputs(args)
+
+		args[2] = "50000"
+		assert predictor.validateInputs(args)
+
+		// Roster - we don't currently check this
+
+		// Sport
+		args[4] = "wnba"
+		assert !predictor.validateInputs(args)
+
+		args[4] = Predictor.SPORT_BASEBALL
+		assert predictor.validateInputs(args)
+		args[4] = Predictor.SPORT_FOOTBALL
+		assert predictor.validateInputs(args)
+	}
 }
