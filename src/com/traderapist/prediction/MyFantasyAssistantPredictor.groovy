@@ -9,7 +9,7 @@ package com.traderapist.prediction
  */
 class MyFantasyAssistantPredictor extends Predictor {
 	/**
-	 * Expect input in the form of <name>,<position>,<fantasy points>,<salary>
+	 * Expect input in the form of <name>,<position>,<fantasy points>
 	 *
 	 * FOOTBALL
 	 * <tr.*?><td.*?><a.*?>(.*?) \(([A-Z]+), [A-Z]+\)<\/a>.*?(<td class="nf strong">(.*?)<\/td>)<td.*?>.*?<\/td><td>\$(\d+)<\/td>.*?<\/tr>
@@ -98,6 +98,8 @@ class MyFantasyAssistantPredictor extends Predictor {
 	}
 
 	/**
+	 * Expect input in the form of <name>,<position>,<salary>
+	 *
 	 * FanDuel
 	 * <tr.*?><td.*?><span>(\w+)<\/span><\/td><td><div.*?>([\w\. ]+)(<span class="icon-\w+">\w+<\/span>)?<\/div><\/td><td>.*?<\/td><td>.*?<\/td><td>.*?<\/td><td>\$(.*?),(\d+)<\/td>.*?<\/tr>
 	 * \2,\1,\4\5\n
@@ -105,7 +107,7 @@ class MyFantasyAssistantPredictor extends Predictor {
 	 * @return
 	 */
 	def readSalaries() {
-		def file = (site == DRAFT_KINGS) ? "data/draftkings/salaries_baseball.csv" : "data/fanduel/salaries_baseball.csv"
+		def file = "data/${site}/salaries_${sport}.csv"
 
 		new File(file).eachLine { line ->
 			def pieces = line.split(",")
@@ -171,7 +173,7 @@ class MyFantasyAssistantPredictor extends Predictor {
 	}
 
 	def run() {
-		def file = "data/numberfire/${site}_${sport}.csv"
+		def file = "data/${projectionSource}/${site}_${sport}.csv"
 
 		if(sport == SPORT_FOOTBALL)
 			readInputFootball(file)
@@ -194,13 +196,9 @@ class MyFantasyAssistantPredictor extends Predictor {
 	}
 
 	public static void main(String[] args) {
-		if(args.length < 4 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${DRAFT_STREET}") || !args[1].matches("\\d+") || !args[3].matches("baseball|football")) {
-			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS> <budget> <roster types> <baseball|football>"
-			return
-		}
+		Predictor.validateInputs(args)
 
-		def p = new MyFantasyAssistantPredictor(site: args[0], budget: args[1].toInteger(), positionTypes: args[2], sport: args[3])
-
-		p.run()
+		new MyFantasyAssistantPredictor(site: args[0], projectionSource: args[1], budget: args[2].toInteger(), positionTypes: args[3], sport: args[4])
+				.run()
 	}
 }
