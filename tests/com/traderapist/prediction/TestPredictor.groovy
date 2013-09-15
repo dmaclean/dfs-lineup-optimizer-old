@@ -123,4 +123,23 @@ class TestPredictor {
 		assert predictor.isCorrectStartingIndex(3, 20) == false
 		assert predictor.isCorrectStartingIndex(3, 21) == true
 	}
+
+	@Test
+	void testNormalizeBaseballPosition() {
+		predictor.sport = Predictor.SPORT_BASEBALL
+
+		assert predictor.normalizeBaseballPosition("P") == "P"
+		assert predictor.normalizeBaseballPosition("SP") == "P"
+		assert predictor.normalizeBaseballPosition("RP") == "P"
+		assert predictor.normalizeBaseballPosition("C") == "C"
+		assert predictor.normalizeBaseballPosition("1B") == "1B"
+		assert predictor.normalizeBaseballPosition("2B") == "2B"
+		assert predictor.normalizeBaseballPosition("3B") == "3B"
+		assert predictor.normalizeBaseballPosition("SS") == "SS"
+		assert predictor.normalizeBaseballPosition("RF") == "OF"
+		assert predictor.normalizeBaseballPosition("CF") == "OF"
+		assert predictor.normalizeBaseballPosition("LF") == "OF"
+		assert predictor.normalizeBaseballPosition("OF") == "OF"
+		assert predictor.normalizeBaseballPosition("DH") == "1B"
+	}
 }

@@ -487,6 +487,26 @@ class Predictor {
 		}
 	}
 
+	/**
+	 * Remap position names for baseball.
+	 *
+	 * @param position      The position to remap.
+	 * @return              The new position name.
+	 */
+	def normalizeBaseballPosition(position) {
+		if(position.matches("LF|CF|RF")) {
+			return "OF"
+		}
+		else if(position.matches("DH")) {
+			return "1B"
+		}
+		else if(position.matches("SP|RP")) {
+			return "P"
+		}
+
+		return position
+	}
+
 	def run() {
 		def file = "data/numberfire/${site}_${sport}.csv"
 
