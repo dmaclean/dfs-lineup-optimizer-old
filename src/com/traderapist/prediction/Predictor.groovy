@@ -283,9 +283,9 @@ class Predictor {
 	 */
 	def printOptimalRoster() {
 		println "Found best configuration so far with ${ bestPoints } for the following players:"
-		def sal = 0
 
 		bestRosters.each { roster ->
+			def sal = 0
 			roster.eachWithIndex { p, i ->
 				def points = projections[positionTypesAsArray[i]][p]
 				println "\t${ p } (${ salaries[p] } - ${ points })"
