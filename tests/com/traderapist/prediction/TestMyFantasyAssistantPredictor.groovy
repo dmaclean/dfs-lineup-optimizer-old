@@ -98,7 +98,7 @@ class TestMyFantasyAssistantPredictor {
 	}
 
 	@Test
-	void testReadSalaries_Baseball() {
+	void testReadSalaries_Baseball_FanDuel() {
 		predictor.sport = Predictor.SPORT_BASEBALL
 		predictor.site = Predictor.FAN_DUEL
 
@@ -125,6 +125,36 @@ class TestMyFantasyAssistantPredictor {
 
 		assert predictor.salaries["tyler colvin"] == 6000
 		assert predictor.salaries["shelley duncan"] == 7000
+	}
+
+	@Test
+	void testReadSalaries_Baseball_DraftKings() {
+		predictor.sport = Predictor.SPORT_BASEBALL
+		predictor.site = Predictor.DRAFT_KINGS
+
+		predictor.readInputBaseball("data/test/MyFantasyAssistant/baseball.csv")
+		predictor.readSalaries("data/test/${predictor.site}/salaries_baseball.csv")
+
+		assert predictor.salaries["cliff lee"] == 12700
+		assert predictor.salaries["aj burnett"] == 9300
+
+		assert predictor.salaries["hector gimenez"] == 3400
+		assert predictor.salaries["john hester"] == 2000
+
+		assert predictor.salaries["carlos pena"] == 2800
+		assert predictor.salaries["travis ishikawa"] == 2000
+
+		assert predictor.salaries["ryan roberts"] == 2000
+		assert predictor.salaries["brendan harris"] == 2400
+
+		assert predictor.salaries["trevor plouffe"] == 3800
+		assert predictor.salaries["luis jimenez"] == 2300
+
+		assert predictor.salaries["alex gonzalez"] == 3100
+		assert predictor.salaries["cody ransom"] == 2800
+
+		assert predictor.salaries["tyler colvin"] == 4200
+		assert predictor.salaries["shelley duncan"] == 2300
 	}
 
 	@Test

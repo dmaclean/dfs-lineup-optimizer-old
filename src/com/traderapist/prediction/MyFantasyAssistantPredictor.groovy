@@ -113,9 +113,15 @@ class MyFantasyAssistantPredictor extends Predictor {
 
 			def positions = (position.contains("/")) ? position.split("/") : [position]
 			for(p in positions) {
+				/*
+				 * For baseball, make sure we normalize the positions because sometimes, for
+				 * instance, a pitcher will come over as SP or RP and needs to be P.
+				 */
+				if(sport == SPORT_BASEBALL)
+					p = normalizeBaseballPosition(p)
 				if(!projections[p].containsKey(name)) {
 					println "Could not find a projection for ${name}"
-					return false
+					continue
 				}
 
 				salaries[name] = salary
