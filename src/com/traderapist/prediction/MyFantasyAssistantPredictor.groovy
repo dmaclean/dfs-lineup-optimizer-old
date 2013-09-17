@@ -12,8 +12,8 @@ class MyFantasyAssistantPredictor extends Predictor {
 	 * Expect input in the form of <name>,<position>,<fantasy points>
 	 *
 	 * FOOTBALL
-	 * <tr.*?><td.*?><a.*?>(.*?) \(([A-Z]+), [A-Z]+\)<\/a>.*?(<td class="nf strong">(.*?)<\/td>)<td.*?>.*?<\/td><td>\$(\d+)<\/td>.*?<\/tr>
-	 * \1,\2,\4,\5\n
+	 * <tr><td>\d+\.\s*<\/td><td>(.*?)<\/td><td>([\w\d]+)<\/td><td>\w+<\/td><td>@*\w+<\/td><td>([\d\.]+)<\/td><\/tr>
+	 * \1,\2,\3\n
 	 *
 	 * @param file
 	 * @return
@@ -23,38 +23,22 @@ class MyFantasyAssistantPredictor extends Predictor {
 
 		new File(file).eachLine { line ->
 			def pieces = line.split(",")
-			def name = pieces[0]
-
-			/*
-			 * Grab the salary and figure out if this is the lowest value for this position.
-			 */
-			def salary = Integer.parseInt(pieces[3])
-			if(salary == 0)
-				return
-
-			salaries[name] = salary
-			if(!minCost.containsKey(pieces[1]))
-				minCost[pieces[1]] = Integer.MAX_VALUE
-
-			if(salary > 0 && salary < minCost[pieces[1]])
-				minCost[pieces[1]] = salary
+			def projection = Double.parseDouble(pieces[2])
+			def name = (pieces[1] == "DEF") ? FootballTeamLookup.cityToTeamName[pieces[0]] : pieces[0].replaceAll("\"", "").replaceAll("\\.", "").trim().toLowerCase()
 
 			/*
 			 * Check if the map of projections for this position exists, and if not, create it.
 			 */
 			if(!projections.containsKey(pieces[1]))
 				projections[pieces[1]] = [:]
-			projections[pieces[1]][name] = Double.parseDouble(pieces[2])
+			projections[pieces[1]][name] = projection
 
 			/*
 			 * For football, add RB, WR, and TEs to the flex position.
 			 */
 			if(pieces[1].matches("RB|WR|TE"))
-				projections["FLEX"][name] = Double.parseDouble(pieces[2])
+				projections["FLEX"][name] = projection
 		}
-
-		// Figure out the smallest FLEX cost
-		minCost["FLEX"] = Math.min(minCost["RB"], Math.min(minCost["WR"], minCost["TE"]))
 	}
 
 	/**
@@ -106,42 +90,48 @@ class MyFantasyAssistantPredictor extends Predictor {
 	 *
 	 * @return
 	 */
-	def readSalaries() {
-		def file = "data/${site}/salaries_${sport}.csv"
-
+	def readSalaries(file) {
 		new File(file).eachLine { line ->
 			def pieces = line.split(",")
 			def name = pieces[0].replaceAll("\"", "").replaceAll("\\.", "").trim().toLowerCase()
+			def position = pieces[1]
 			def salary = pieces[2].toInteger()
+
+			/*
+			 * Football defense names come in different forms depending on the site we're using.
+			 * For example, Draft Kings uses "<team name>" while FanDuel uses "<city> <team name>".
+			 *
+			 * We need to normalize this so defenses don't get filtered out when we do data cleaning.
+			 */
+			if(sport == SPORT_FOOTBALL && position == "DEF")
+				name = normalizeFootballTeamName(name)
 
 			if(salaries.containsKey(name)) {
 				println "Salaries already contains ${ name }"
 				return false
 			}
 
-			def position
-			projections.each { pos, proj ->
-				if(position) return
-
-				if(proj.containsKey(name)) {
-					position = pos
+			def positions = (position.contains("/")) ? position.split("/") : [position]
+			for(p in positions) {
+				if(!projections[p].containsKey(name)) {
+					println "Could not find a projection for ${name}"
+					return false
 				}
+
+				salaries[name] = salary
+				if(!minCost.containsKey(p))
+					minCost[p] = Integer.MAX_VALUE
+
+				if(salary > 0 && salary < minCost[p])
+					minCost[p] = salary
+
+				salaries[name] = salary
 			}
-
-			if(!position) {
-				println "Could not find a projection for ${name}"
-				return false
-			}
-
-			salaries[name] = salary
-			if(!minCost.containsKey(position))
-				minCost[position] = Integer.MAX_VALUE
-
-			if(salary > 0 && salary < minCost[position])
-				minCost[position] = salary
-
-			salaries[name] = salary
 		}
+
+		// Figure out the smallest FLEX cost
+		if(sport == SPORT_FOOTBALL)
+			minCost["FLEX"] = Math.min(minCost["RB"], Math.min(minCost["WR"], minCost["TE"]))
 	}
 
 	def cleanData() {
@@ -172,15 +162,25 @@ class MyFantasyAssistantPredictor extends Predictor {
 		}
 	}
 
+	def normalizeFootballTeamName(name) {
+		if(site == FAN_DUEL) {
+			def team = name.split(" ")
+			return team[team.length-1]
+		}
+
+		return name
+	}
+
 	def run() {
-		def file = "data/${projectionSource}/${site}_${sport}.csv"
+		def projectionFile = "data/${projectionSource}/${sport}.csv"
+		def salaryFile = "data/${site}/salaries_${sport}.csv"
 
 		if(sport == SPORT_FOOTBALL)
-			readInputFootball(file)
+			readInputFootball(projectionFile)
 		else if(sport == SPORT_BASEBALL)
-			readInputBaseball(file)
+			readInputBaseball(projectionFile)
 
-		readSalaries()
+		readSalaries(salaryFile)
 
 		cleanData()
 
