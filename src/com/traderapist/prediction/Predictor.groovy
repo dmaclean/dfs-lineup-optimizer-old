@@ -329,11 +329,28 @@ class Predictor {
 	def reportTableStats() {
 		def total = tableHits + tableMisses
 		if(total % 100000 == 0 && tableHits > 0) {
-			println "Table hits ${ tableHits/total }% \t\tTable misses ${ tableMisses/total }%\t\t\t" +
-					"(${table.items[0].size()}/${table.items[1].size()}/${table.items[2].size()}/${table.items[3].size()}/" +
-					"${table.items[4].size()}/${table.items[5].size()}/${table.items[6].size()}/${table.items[7].size()}/${table.items[8].size()})" +
-					"\t\t\t(${tableHitRate[0]/tableHits}/${tableHitRate[1]/tableHits}/${tableHitRate[2]/tableHits}/${tableHitRate[3]/tableHits}/${tableHitRate[4]/tableHits}/" +
-					"${tableHitRate[5]/tableHits}/${tableHitRate[6]/tableHits}/${tableHitRate[7]/tableHits}/${tableHitRate[8]/tableHits})"
+			def s = "Table hits ${ tableHits/total }% \t\tTable misses ${ tableMisses/total }%\t\t\t("
+			table.items.eachWithIndex{ ArrayList item, int i ->
+				s += "${item.size()}"
+				if(i != table.items.size() -1) {
+					s += "/"
+				}
+				else {
+					s += ")\t\t\t("
+				}
+			}
+
+			tableHitRate.eachWithIndex{ rate, i ->
+				s += "${rate/tableHits}"
+				if(i != tableHitRate.size() -1) {
+					s += "/"
+				}
+				else {
+					s += ")"
+				}
+			}
+
+			println s
 		}
 	}
 
