@@ -10,8 +10,45 @@ package com.traderapist.prediction
 class DailyFantasyProjectionsPredictor extends Predictor {
 	def positionsMap = [:]
 
+	/**
+	 * Expect input in the form of <name>,<fantasy Points>
+	 *
+	 * ([\w\s\.\-]+),\s+\w+\s+([\d\.\-]+)
+	 * \1,\2
+	 *
+	 * @param file
+	 */
 	def readInputFootball(file) {
+		projections["FLEX"] = [:]
 
+		new File(file).eachLine { line ->
+			def pieces = line.split(",")
+			def name = pieces[0].replaceAll("\"", "").replaceAll("\\.", "").trim().toLowerCase()
+
+			/*
+			 * For baseball, we need to separate players that have two different positions
+			 * listed, such as 2B/RF.
+			 */
+			def positions = positionsMap[name]
+			if(!positions)
+				return
+
+			for(position in positions) {
+				/*
+				 * Check if the map of projections for this position exists, and if not, create it.
+				 */
+				if(!projections.containsKey(position))
+					projections[position] = [:]
+				projections[position][name] = Double.parseDouble(pieces[1])
+
+				if(position.matches("RB|WR|TE")) {
+					projections["FLEX"][name] = Double.parseDouble(pieces[1])
+				}
+			}
+		}
+
+		// Figure out the smallest FLEX cost
+		minCost["FLEX"] = Math.min(minCost["RB"], Math.min(minCost["WR"], minCost["TE"]))
 	}
 
 	/**
@@ -26,6 +63,8 @@ class DailyFantasyProjectionsPredictor extends Predictor {
 	 * @param file
 	 */
 	def readInputBaseball(file) {
+		projections["FLEX"] = [:]
+
 		new File(file).eachLine { line ->
 			def pieces = line.split(",")
 			def name = pieces[0].replaceAll("\"", "").replaceAll("\\.", "").trim().toLowerCase()
@@ -47,8 +86,18 @@ class DailyFantasyProjectionsPredictor extends Predictor {
 				if(!projections.containsKey(position))
 					projections[position] = [:]
 				projections[position][name] = Double.parseDouble(pieces[1])
+
+				if(position.matches("C|1B|2B|3B|SS|OF")) {
+					projections["FLEX"][name] = Double.parseDouble(pieces[1])
+				}
 			}
 		}
+
+		minCost["FLEX"] = Math.min(minCost["C"],
+				Math.min(minCost["1B"],
+						Math.min(minCost["2B"],
+								Math.min(minCost["3B"],
+										Math.min(minCost["SS"], minCost["OF"])))))
 	}
 
 	/**
