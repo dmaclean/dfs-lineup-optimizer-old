@@ -216,6 +216,8 @@ class Predictor {
 	 * @return
 	 */
 	def readInputBaseball(file) {
+		projections["FLEX"] = [:]
+
 		new File(file).eachLine { line ->
 			def pieces = line.split(",")
 			def name = pieces[0]
@@ -263,8 +265,18 @@ class Predictor {
 				if(!projections.containsKey(position))
 					projections[position] = [:]
 				projections[position][name] = Double.parseDouble(pieces[2])
+
+				if(position.matches("C|1B|2B|3B|SS|OF")) {
+					projections["FLEX"][name] = Double.parseDouble(pieces[2])
+				}
 			}
 		}
+
+		minCost["FLEX"] = Math.min(minCost["C"],
+									Math.min(minCost["1B"],
+									Math.min(minCost["2B"],
+									Math.min(minCost["3B"],
+									Math.min(minCost["SS"], minCost["OF"])))))
 	}
 
 	/**
@@ -590,6 +602,15 @@ class Predictor {
 		}
 
 		return position
+	}
+
+	def normalizeFootballTeamName(name) {
+		if(site == FAN_DUEL) {
+			def team = name.split(" ")
+			return team[team.length-1]
+		}
+
+		return name
 	}
 
 	def run() {

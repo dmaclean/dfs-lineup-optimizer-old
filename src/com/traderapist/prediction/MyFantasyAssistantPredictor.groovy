@@ -81,15 +81,6 @@ class MyFantasyAssistantPredictor extends Predictor {
 		}
 	}
 
-	def normalizeFootballTeamName(name) {
-		if(site == FAN_DUEL) {
-			def team = name.split(" ")
-			return team[team.length-1]
-		}
-
-		return name
-	}
-
 	def run() {
 		def projectionFile = "data/${projectionSource}/${sport}.csv"
 		def salaryFile = "data/${site}/salaries_${sport}.csv"
