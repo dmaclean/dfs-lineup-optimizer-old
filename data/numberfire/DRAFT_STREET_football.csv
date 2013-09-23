@@ -1,7 +1,6 @@
 Peyton Manning,QB,22.21,19883
 Aaron Rodgers,QB,22.14,18924
 Tom Brady,QB,21.78,14434
-Michael Vick,QB,21.66,17069
 Colin Kaepernick,QB,20.96,16394
 Robert Griffin III,QB,19.79,16174
 Drew Brees,QB,19.44,17346
@@ -11,9 +10,7 @@ Cam Newton,QB,18.04,14562
 Russell Wilson,QB,17.96,12845
 Adrian Peterson,RB,17.92,15311
 Sam Bradford,QB,17.45,14691
-Lesean McCoy,RB,16.80,15845
 E.J. Manuel,QB,16.70,11444
-Alex Smith,QB,16.39,13157
 Tony Romo,QB,15.80,14033
 Andy Dalton,QB,15.56,14161
 Philip Rivers,QB,15.36,14428
@@ -31,7 +28,6 @@ Carson Palmer,QB,13.36,13203
 Demaryius Thomas,WR,13.35,14446
 Ben Roethlisberger,QB,13.16,10025
 Terrelle Pryor,QB,12.81,14234
-Jamaal Charles,RB,12.79,15732
 Christian Ponder,QB,12.22,10180
 A.J. Green,WR,12.13,15738
 Joe Flacco,QB,12.08,11518
@@ -45,7 +41,6 @@ Andre Johnson,WR,11.33,12871
 C.J. Spiller,RB,11.15,11849
 Wes Welker,WR,11.11,12779
 Randall Cobb,WR,11.07,14754
-DeSean Jackson,WR,11.01,13584
 Victor Cruz,WR,10.98,13735
 Matt Forte,RB,10.90,14437
 Chris Johnson,RB,10.90,11020
@@ -81,7 +76,6 @@ Darren McFadden,RB,8.62,11256
 Roddy White,WR,8.53,6850
 Chad Henne,QB,8.50,0
 Darren Sproles,RB,8.32,11556
-Dwayne Bowe,WR,8.05,10888
 Tavon Austin,WR,8.04,9920
 Greg Olsen,TE,7.99,9736
 Knowshon Moreno,RB,7.99,11373
@@ -173,9 +167,7 @@ Zach Miller,TE,4.01,4629
 Greg Little,WR,3.98,4196
 Jonathan Dwyer,RB,3.90,2072
 Kevin Ogletree,WR,3.90,2785
-Knile Davis,RB,3.88,2002
 Leonard Hankerson,WR,3.86,6325
-Brent Celek,TE,3.84,4705
 Brandon LaFell,WR,3.75,4307
 Stedman Bailey,WR,3.70,0
 Kellen Winslow Jr.,TE,3.63,0
@@ -204,7 +196,6 @@ Zac Stacy,RB,2.96,0
 Terrance Williams,WR,2.95,3179
 Jackie Battle,RB,2.94,3526
 Ryan Broyles,WR,2.92,0
-Zach Ertz,TE,2.90,3058
 Ed Dickson,TE,2.88,2299
 Isaiah Pead,RB,2.80,3660
 Brian Quick,WR,2.71,2472
@@ -215,7 +206,6 @@ Fred Davis,TE,2.58,3758
 Vance McDonald,TE,2.57,2983
 Delanie Walker,TE,2.55,5495
 Gavin Escobar,TE,2.51,0
-Travis Kelce,TE,2.33,2075
 Harry Douglas,WR,2.33,6489
 Marvin Jones,WR,2.24,2509
 Michael Bush,RB,2.23,2000
@@ -284,7 +274,6 @@ Seattle D/ST,DEF,13.74,9850
 Chicago D/ST,DEF,12.73,7059
 Denver D/ST,DEF,12.41,6334
 Minnesota D/ST,DEF,11.45,5672
-Philadelphia D/ST,DEF,11.39,3542
 New Orleans D/ST,DEF,10.90,2565
 San Diego D/ST,DEF,10.36,4118
 Pittsburgh D/ST,DEF,10.14,3499
@@ -295,7 +284,6 @@ Houston D/ST,DEF,9.40,4666
 Buffalo D/ST,DEF,9.38,5810
 St. Louis D/ST,DEF,9.24,3773
 New York Jets D/ST,DEF,9.06,4522
-Kansas City D/ST,DEF,8.74,2955
 San Francisco D/ST,DEF,8.53,5328
 Arizona D/ST,DEF,8.30,1428
 Carolina D/ST,DEF,8.15,2235
