@@ -1,10 +1,10 @@
-Clayton Kershaw,P,10200
-Yu Darvish,P,10000
-Cliff Lee,P,9700
-Chris Sale,P,9700
-Ubaldo Jimenez,P,9200
-Zack Greinke,P,9200
-Matt Harvey,P,8900
+Matt Garza,P,7600
+Dillon Gee,P,7300
+Tim Lincecum,P,7100
+Ivan Nova,P,6700
+Mark Buerhle,P,6700
+Trevor Cahill,P,5900
+Miguel Gonzalez,P,5700
 Madison Bumgarner,P,8700
 Cole Hamels,P,8600
 James Shields,P,8600
@@ -123,7 +123,7 @@ Brett Gardner,OF,4200
 Carlos Torres,P,4200
 Phil Hughes,P,4200
 Alfonso Soriano,OF,4200
-Chris Davis,P,4200
+Chris Davis,1B,4200
 Dylan Axelrod,P,4200
 Mark Rogers,P,4100
 Aaron Laffey,P,4100
@@ -295,7 +295,7 @@ Javy Guerra,P,3000
 Miguel Gonzalez,C,3000
 Jarrod Dyson,OF,3000
 Christopher Dwyer,P,3000
-Carlos Ruiz,P,3000
+Carlos Ruiz,C,3000
 Burke Badenhop,P,3000
 Yordano Ventura,P,3000
 James Nelson,P,3000
@@ -410,7 +410,7 @@ Lucas Duda,OF,2600
 A.J. Ellis,C,2600
 Ryan Doumit,C,2600
 Wilson Betemit,3B,2600
-Juan Perez,P,2600
+Juan Perez,OF,2600
 Josh Lueke,P,2500
 Adam Dunn,1B,2500
 George Kontos,P,2500
