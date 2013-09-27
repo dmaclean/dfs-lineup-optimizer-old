@@ -190,4 +190,16 @@ class TestPredictor {
 		args[4] = Predictor.SPORT_FOOTBALL
 		assert predictor.validateInputs(args)
 	}
+
+	@Test
+	void testOptimalNumberFire() {
+		predictor.site = Predictor.DRAFT_KINGS
+		predictor.positionTypes = "RB,RB,WR,WR,TE,DEF,K,FLEX,QB"
+
+		predictor.readInputFootball("data/test/DRAFT_KINGS_football_optimal_test.csv")
+		predictor.initializePositionTypes()
+		predictor.table.initializeItemsList(predictor.positionTypes)
+
+		predictor.generateOptimalTeamMemoization(0, 50000, 0, [])
+	}
 }
