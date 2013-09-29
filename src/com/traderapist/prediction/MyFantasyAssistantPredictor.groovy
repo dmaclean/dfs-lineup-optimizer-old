@@ -24,7 +24,8 @@ class MyFantasyAssistantPredictor extends Predictor {
 		new File(file).eachLine { line ->
 			def pieces = line.split(",")
 			def projection = Double.parseDouble(pieces[2])
-			def name = (pieces[1] == "DEF") ? FootballTeamLookup.cityToTeamName[pieces[0]] : pieces[0].replaceAll("\"", "").replaceAll("\\.", "").trim().toLowerCase()
+//			def name = (pieces[1] == "DEF") ? FootballTeamLookup.cityToTeamName[pieces[0]] : pieces[0].replaceAll("\"", "").replaceAll("\\.", "").trim().toLowerCase()
+			def name = pieces[0].replaceAll("\"", "").replaceAll("\\.", "").trim().toLowerCase()
 
 			/*
 			 * Check if the map of projections for this position exists, and if not, create it.
