@@ -35,6 +35,7 @@ class GenerateFantasyPoints {
 	static String SAFETY = "SAFETY"
 	static String BLOCK_KICK = "BLOCK_KICK"
 	static String INTERCEPTION = "INTERCEPTION"
+	static String POINTS_ALLOWED = "POINTS_ALLOWED"
 	static String POINTS_ALLOWED_0 = "POINTS_ALLOWED_0"
 	static String POINTS_ALLOWED_1_6 = "POINTS_ALLOWED_1_6"
 	static String POINTS_ALLOWED_7_13 = "POINTS_ALLOWED_7_13"
@@ -60,6 +61,14 @@ class GenerateFantasyPoints {
 
 			println "DRAFT_KINGS\t\t${it.name}/${it.position}/${it.season}/${it.week} - ${points}"
 			fpODFL.add(player_id: it.player_id, stats_oneline_id: it.id, season: it.season, week: it.week, odfl_site: "DRAFT_KINGS", points: points)
+		}
+
+		// Draft Street
+		sql.eachRow("select * from stats_oneline where id not in (select stats_oneline_id from fantasy_points_odfl where odfl_site = ?)", ["DRAFT_STREET"]) {
+			def points = generateDraftStreetPoints(it)
+
+			println "DRAFT_STREET\t\t${it.name}/${it.position}/${it.season}/${it.week} - ${points}"
+			fpODFL.add(player_id: it.player_id, stats_oneline_id: it.id, season: it.season, week: it.week, odfl_site: "DRAFT_STREET", points: points)
 		}
 	}
 
@@ -147,6 +156,34 @@ class GenerateFantasyPoints {
 		points += row[POINTS_ALLOWED_14_20] * 1
 		points += row[POINTS_ALLOWED_28_34] * -1
 		points += row[POINTS_ALLOWED_35_PLUS] * -4
+
+		return points
+	}
+
+	def generateDraftStreetPoints(row) {
+		def points = 0.0
+
+		points += row[RUSHING_YARDS] * 0.1
+		points += row[RUSHING_TOUCHDOWNS] * 6
+		points += row[PASSING_YARDS] * 0.04
+		points += row[PASSING_TOUCHDOWNS] * 4
+		points += row[INTERCEPTIONS] * -1
+		points += row[RECEPTION_YARDS] * 0.1
+		points += row[RECEPTION_TOUCHDOWNS] * 6
+		points += row[RECEPTIONS] * 0.5
+		points += row[RETURN_TOUCHDOWNS] * 6        // Punts and kicks
+		points += row[FUMBLES_LOST] * -1
+		points += row[TWO_POINT_CONVERSIONS] * 2
+
+		points += row[SACK] * 0.5
+		points += row[FUMBLE_RECOVERY] * 1
+		points += row[DEFENSIVE_TOUCHDOWN] * 6
+		points += row[KICKOFF_AND_PUNT_RETURN_TOUCHDOWNS] * 6
+		points += row[SAFETY] * 2
+		points += row[BLOCK_KICK] * 2
+		points += row[INTERCEPTION] * 1
+
+		points += row[POINTS_ALLOWED] * -0.5
 
 		return points
 	}
