@@ -122,6 +122,11 @@ class Predictor {
 	static def SPORT_BASEBALL = "baseball"
 	static def SPORT_FOOTBALL = "football"
 
+	/*
+	 * Projection sources
+	 */
+	static def BAYESFF = "BayesFF"
+
 	def initializePositionTypes() {
 		def pieces = positionTypes.split(",")
 
@@ -151,9 +156,13 @@ class Predictor {
 	/**
 	 * Expect input in the form of <name>,<position>,<fantasy points>,<salary>
 	 *
-	 * FOOTBALL
+	 * FOOTBALL (NF predictions)
 	 * <tr.*?><td.*?><a.*?>(.*?) \(([A-Z]+), [A-Z]+\)<\/a>.*?(<td class="nf strong">(.*?)<\/td>)<td.*?>.*?<\/td><td>\$(\d+)<\/td>.*?<\/tr>
 	 * \1,\2,\4,\5\n
+	 *
+	 * (Site predictions)
+	 * <tr.*?><td.*?><a.*?>(.*?) \(([A-Z]+), [A-Z]+\)<\/a>.*?(<td class="nf strong">(.*?)<\/td>)<td class="sep">([\d\.]+)<\/td><td>\$(\d+)<\/td>.*?<\/tr>
+	 * \1,\2,\5,\6\n
 	 *
 	 * BASEBALL
 	 * <tr.*?><td.*?>\*?<a.*?>(.*?) \(([\d\/A-Z]+), [A-Z]+\)<\/a><\/td>(<td.*?>[\d\.]+<\/td>){0,13}<td class="sep">([\d\.]+)<\/td><td>\$(\d+)<\/td>.*?<\/tr>
@@ -540,7 +549,7 @@ class Predictor {
 					if(budget-cost >= minTotalCost[depth+1]) {
 						roster << e.key
 						result = generateOptimalTeamMemoization(depth+1, budget - cost, totalPoints + points, roster)
-						roster.remove(e.key)
+						roster.remove(roster.size()-1)
 
 						// Do we have an optimal solution?
 						if(result && totalPoints + e.value + result.points > bestPoints) {
@@ -574,7 +583,12 @@ class Predictor {
 						if(result) {
 							def newItem = new MemoItem(cost: salaries[e.key] + result.cost, points: e.value + result.points, roster: [e.key])
 							newItem.roster.addAll(result.roster)
-							table.writeSolution(depth, newItem)
+
+							Set s = new HashSet(newItem.roster)
+
+							if(s.size() == newItem.roster.size()) {
+								table.writeSolution(depth, newItem)
+							}
 						}
 					}
 				}
@@ -662,9 +676,9 @@ class Predictor {
 
 	static def validateInputs(args) {
 		if(args.length < 5 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${DRAFT_STREET}") ||
-				!args[1].matches("NumberFire|MyFantasyAssistant|DailyFantasyProjections") ||
+				!args[1].matches("NumberFire|MyFantasyAssistant|DailyFantasyProjections|${BAYESFF}") ||
 				!args[2].matches("\\d+") || !args[4].matches("baseball|football")) {
-			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|DRAFT_STREET> <NumberFire|MyFantasyAssistant|DailyFantasyProjections> <budget> <roster types> <baseball|football>"
+			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|DRAFT_STREET> <${BAYESFF}|NumberFire|MyFantasyAssistant|DailyFantasyProjections> <budget> <roster types> <baseball|football>"
 			return false
 		}
 

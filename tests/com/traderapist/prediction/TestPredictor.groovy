@@ -202,4 +202,18 @@ class TestPredictor {
 
 		predictor.generateOptimalTeamMemoization(0, 50000, 0, [])
 	}
+
+	@Test
+	void testOptimalNumberFire2() {
+		predictor.site = Predictor.DRAFT_KINGS
+		predictor.positionTypes = "QB,RB,RB,WR,WR,TE,DEF,K,FLEX"
+
+		predictor.readInputFootball("data/test/DRAFT_KINGS_football_optimal_test_2.csv")
+		predictor.initializePositionTypes()
+		predictor.table.initializeItemsList(predictor.positionTypes)
+
+		predictor.generateOptimalTeamMemoization(0, 50000, 0, [])
+
+		assert predictor.bestPoints > 156
+	}
 }
