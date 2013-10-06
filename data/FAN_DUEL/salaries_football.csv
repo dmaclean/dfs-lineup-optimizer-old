@@ -94,47 +94,47 @@ Michael Floyd,WR,5900
 Jason Snelling,RB,5900
 Kenbrell Thompkins,WR,5900
 Owen Daniels,TE,5800
-Seattle Seahawks,D,5800
+Seattle Seahawks,DEF,5800
 Stephen Gostkowski,K,5700
 Jared Cook,RB,5600
 Ben Tate,RB,5600
 David Wilson,RB,5600
 Johnathan Franklin,RB,5600
-San Francisco 49ers,D,5600
+San Francisco 49ers,DEF,5600
 Isaiah Pead,RB,5600
 Bernard Pierce,RB,5500
 Ryan Fitzpatrick,QB,5500
 Jacquizz Rodgers,RB,5500
 Matt Flynn,QB,5500
 Justin Blackmon,WR,5500
-Houston Texans,D,5500
+Houston Texans,DEF,5500
 T.Y. Hilton,WR,5500
 Garrett Hartley,K,5500
 David Akers,K,5500
 Matt Prater,K,5500
-St Louis Rams,D,5400
+St Louis Rams,DEF,5400
 DeAndre Hopkins,WR,5400
-New England Patriots,D,5400
+New England Patriots,DEF,5400
 Chris Givens,WR,5400
 Kendall Wright,WR,5400
-Denver Broncos,D,5400
+Denver Broncos,DEF,5400
 Pierre Thomas,RB,5400
 Brandon LaFell,WR,5300
 Matt Bryant,K,5300
 Blaine Gabbert,QB,5300
-Kansas City Chiefs,D,5300
+Kansas City Chiefs,DEF,5300
 Chad Henne,QB,5300
 Justin Tucker,K,5300
 Alshon Jeffery,WR,5300
 Adam Vinatieri,K,5300
-Cincinnati Bengals,D,5300
-Tennessee Titans,D,5300
-Chicago Bears,D,5300
+Cincinnati Bengals,DEF,5300
+Tennessee Titans,DEF,5300
+Chicago Bears,DEF,5300
 Caleb Sturgis,K,5200
-Detroit Lions,D,5200
-Green Bay Packers,D,5200
+Detroit Lions,DEF,5200
+Green Bay Packers,DEF,5200
 Alex Henery,K,5200
-Atlanta Falcons,D,5200
+Atlanta Falcons,DEF,5200
 Nick Novak,K,5200
 Phil Dawson,K,5200
 Marcel Reece,RB,5200
@@ -142,21 +142,21 @@ Steven Hauschka,K,5200
 Rashad Jennings,RB,5200
 Ryan Succop,K,5200
 Nate Washington,WR,5200
-Baltimore Ravens,D,5200
+Baltimore Ravens,DEF,5200
 Robbie Gould,K,5200
 Mason Crosby,K,5200
-San Diego Chargers,D,5200
-Miami Dolphins,D,5200
+San Diego Chargers,DEF,5200
+Miami Dolphins,DEF,5200
 Randy Bullock,K,5200
 Miles Austin,WR,5200
 Tavon Austin,WR,5200
-Arizona Cardinals,D,5200
+Arizona Cardinals,DEF,5200
 Dan Bailey,K,5100
 Graham Gano,K,5100
 Jay Feely,K,5100
 Greg Zuerlein,K,5100
-Carolina Panthers,D,5100
-Dallas Cowboys,D,5100
+Carolina Panthers,DEF,5100
+Dallas Cowboys,DEF,5100
 Garrett Graham,TE,5100
 Montee Ball,RB,5100
 Dominique Davis,QB,5000
@@ -164,20 +164,20 @@ Tyrod Taylor,QB,5000
 Ryan Lindley,QB,5000
 Josh Scobee,K,5000
 Andre Brown,RB,5000
-Jacksonville Jaguars,D,5000
+Jacksonville Jaguars,DEF,5000
 Derek Anderson,QB,5000
 Nick Folk,K,5000
 Mark Sanchez,QB,5000
 Rob Bironas,K,5000
-New York Jets,D,5000
+New York Jets,DEF,5000
 Josh Brown,K,5000
-New York Giants,D,5000
-New Orleans Saints,D,5000
-Philadelphia Eagles,D,5000
+New York Giants,DEF,5000
+New Orleans Saints,DEF,5000
+Philadelphia Eagles,DEF,5000
 Mike Nugent,K,5000
 Kellen Winslow,TE,5000
 Colt McCoy,QB,5000
-Oakland Raiders,D,5000
+Oakland Raiders,DEF,5000
 Matt Hasselbeck,QB,5000
 Sebastian Janikowski,K,5000
 Shaun Hill,QB,5000
@@ -188,7 +188,7 @@ Matt Moore,QB,5000
 Seneca Wallace,QB,5000
 Curtis Painter,QB,5000
 Ryan Mallett,QB,5000
-Indianapolis Colts,D,5000
+Indianapolis Colts,DEF,5000
 Ryan Nassib,QB,5000
 Brock Osweiler,QB,5000
 Vince Young,QB,5000
