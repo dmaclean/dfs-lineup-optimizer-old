@@ -115,6 +115,8 @@ class Predictor {
 
 	def minTotalCost = []
 
+	def count = 0
+
 	static def DRAFT_KINGS = "DRAFT_KINGS"
 	static def DRAFT_STREET = "DRAFT_STREET"
 	static def FAN_DUEL = "FAN_DUEL"
@@ -598,6 +600,55 @@ class Predictor {
 		}
 	}
 
+	def generateOptimalTeamByBruteForce(depth, roster) {
+		indexTracker[depth] = 0
+
+		for(e in positionAtDepth[depth]) {
+			if(isDuplicate(depth, e.key, roster)) {
+				continue
+			}
+
+			roster << e.key
+
+			if(depth == positionAtDepth.size()-1) {
+				def total = 0
+				def points = 0.0
+				def over = false
+				def index = 0
+				for(name in roster) {
+					total += salaries[name]
+					points += positionAtDepth[index][name]
+					if(total > budget) {
+						over = true
+						break
+					}
+
+					index++
+				}
+
+				if(!over && points > bestPoints) {
+					bestPoints = points
+					bestRosters = [roster]
+
+					printOptimalRoster()
+				}
+
+				count++
+
+				if(count % 1000000 == 0) {
+					println "Processed ${count} roster combinations."
+				}
+			}
+			else {
+				generateOptimalTeamByBruteForce(depth+1, roster)
+			}
+
+			roster.remove(roster.size()-1)
+
+			indexTracker[depth]++
+		}
+	}
+
 	/**
 	 * Remap position names for baseball.
 	 *
@@ -640,6 +691,7 @@ class Predictor {
 
 		long start = System.currentTimeMillis()
 		generateOptimalTeamMemoization(0, budget, 0, [])
+//		generateOptimalTeamByBruteForce(0,[])
 		long end = System.currentTimeMillis()
 		println "Computed optimal roster in ${ (end-start)/1000.0 } seconds."
 
