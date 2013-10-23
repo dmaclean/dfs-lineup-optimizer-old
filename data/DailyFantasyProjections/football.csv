@@ -1,1 +1,193 @@
-Peyton Manning,30.24Drew Brees,24.56Tony Romo,23.82Aaron Rodgers,23Robert Griffin III,21.92Terrelle Pryor,20.86Cam Newton,20.28Andrew Luck,20.19Philip Rivers,19.01Matthew Stafford,18.37Tom Brady,17.77Colin Kaepernick,17.61Ben Roethlisberger,17.6Alex Smith,16.56Chad Henne,16.36Andy Dalton,16.3Matt Schaub,16.22Russell Wilson,15.27Nick Foles,14.84Geno Smith,14.81Joe Flacco,14.75Brandon Weeden,14.26Mike Glennon,13.31Sam Bradford,12.73Matt Cassel,11.9Carson Palmer,11.5Ryan Fitzpatrick,9.4Adrian Peterson,22.17Jamaal Charles,21.88Arian Foster,21.42LeSean McCoy,18.95Marshawn Lynch,18.1Doug Martin,17.93DeMarco Murray,17.7Ray Rice,17.68Reggie Bush,15.55Frank Gore,15.39Knowshon Moreno,15.02Fred Jackson,14.84Danny Woodhead,14.63Alfred Morris,13.7Gio Bernard,13.3Darren Sproles,12.25Trent Richardson,11.9BenJarvus Green-Ellis,11.7Le'Veon Bell,11.59Bilal Powell,11.42Eddie Lacy,11.23Pierre Thomas,11.15Joique Bell,10.85Darren McFadden,10.78DeAngelo Williams,10.63C.J. Spiller,10.32Willis McGahee,9.52Maurice Jones-Drew,8.81Brandon Bolden,8.58Chris Johnson,8.33Stevan Ridley,8.25Andre Ellington,8.21Ben Tate,7.92Ronnie Hillman,7.54Zac Stacy,7.48Montee Ball,6.85Daryl Richardson,6.3Mike Tolbert,5.92Roy Helu,5.81Kendall Hunter,5.77Rashard Mendenhall,5.68Bernard Pierce,4.95LeGarrette Blount,4.62Dez Bryant,21.68Demaryius Thomas,19.82A.J. Green,18.75Pierre Garcon,18.15Andre Johnson,17.42Calvin Johnson,17.3Torrey Smith,17.28Antonio Brown,16.93Justin Blackmon,16.92Reggie Wayne,16.83Wes Welker,16.55Jordy Nelson,15.88Vincent Jackson,15.58Josh Gordon,15.33Randall Cobb,15.25Eric Decker,15.22Cecil Shorts,14.62James Jones,13.9Danny Amendola,13.88Steve Smith,13.43T.Y. Hilton,13.4Larry Fitzgerald,12.95Marques Colston,12.85DeSean Jackson,12.67Denarius Moore,12.62Keenan Allen,12.18Dwayne Bowe,11.82Kenbrell Thompkins,11.38Anquan Boldin,11.08Terrance Williams,11.05Mike Williams,10.72Vincent Brown,10.45Julian Edelman,9.73Austin Pettis,9.63Golden Tate,9.38Michael Floyd,9.02Jeremy Kerley,8.73Kendall Wright,8.73Donnie Avery,8.68Jerome Simpson,8.53Ted Ginn,8.48Marlon Brown,8.22Greg Jennings,7.88Kris Durham,7.75Nate Washington,7.37Jimmy Graham,23.52Julius Thomas,15.88Vernon Davis,15.82Jason Witten,15.17Antonio Gates,14.75Greg Olsen,13.22Jordan Cameron,12.58Heath Miller,11.98Jermichael Finley,11.02Garrett Graham,10.82Jordan Reed,9.53Brent Celek,9.52Coby Fleener,8.67Sean McGrath,7.77Brandon Pettigrew,7.73Jeff Cumberland,7.62Tyler Eifert,7.03Jermaine Gresham,5.95Jared Cook,5.48Kyle Rudolph,5.1Scott Chandler,5.02Delanie Walker,4.55Dallas Clark,4.18Lance Kendricks,4.12Seahawks,14.05Broncos,13.2549ers,12.05Chiefs,11.7Texans,10.5Bengals,10.15Steelers,7.55Lions,5.4Jets,4.5Vikings,4.05Eagles,4Cowboys,3.7Browns,3.65Panthers,3.5Packers,3Ravens,2.85Buccaneers,2.85Colts,2.65Saints,2.4Raiders,2.35Titans,1.75Cardinals,1.15Rams,0.5Bills,0.45Patriots,0.05Chargers,0.05Redskins,-2.1Jaguars,-11.5Matt Prater,10.3Robbie Gould,10.2Dan Bailey,9.8Alex Henery,9.8David Akers,9.5Garrett Hartley,9.5Justin Tucker,9.4Phil Dawson,9.3Adam Vinatieri,9Mason Crosby,9Blair Walsh,8.9Steven Hauschka,8.8Randy Bullock,8.4Stephen Gostkowski,8.4Ryan Succop,8.4Mike Nugent,8.4Billy Cundiff,8.1Rian Lindell,8.1Josh Brown,7.9Graham Gano,7.9Nick Folk,7.7Greg Zuerlein,7.7Nick Novak,7.6Shaun Suisham,7.4Sebastian Janikowski,7Kai Forbath,6.9Jay Feely,6.2Rob Bironas,5.9Dan Carpenter,5.9Josh Scobee,4.9Connor Barth,0Caleb Sturgis,0Dustin Hopkins,0Matt Bryant,0Lawrence Tynes,0
+Peyton Manning,26.10
+Tony Romo,24.88
+Jay Cutler,20.95
+Andrew Luck,20.80
+Cam Newton,20.63
+Philip Rivers,20.56
+Tom Brady,20.44
+Aaron Rodgers,20.32
+Nick Foles,19.54
+Robert Griffin III,19.14
+Matthew Stafford,19.08
+Eli Manning,17.98
+Ryan Tannehill,17.64
+Andy Dalton,16.85
+Brandon Weeden,16.70
+Chad Henne,16.60
+Colin Kaepernick,16.37
+Matt Ryan,16.34
+Ben Roethlisberger,16.02
+Jake Locker,15.31
+Josh Freeman,15.17
+Sam Bradford,14.84
+Mike Glennon,14.50
+Joe Flacco,14.40
+Thad Lewis,13.02
+Alex Smith,12.37
+Geno Smith,12.22
+Case Keenum,9.68
+Adrian Peterson,22.85
+LeSean McCoy,22.65
+Jamaal Charles,20.51
+Matt Forte,18.89
+Arian Foster,18.26
+Doug Martin,17.25
+Reggie Bush,16.25
+Ray Rice,16.23
+Frank Gore,16.03
+Alfred Morris,15.83
+Eddie Lacy,15.59
+Knowshon Moreno,15.40
+Bilal Powell,14.41
+Giovani Bernard,14.28
+Fred Jackson,13.51
+Danny Woodhead,13.11
+Brandon Jacobs,12.70
+Joseph Randle,12.30
+DeAngelo Williams,12.23
+Lamar Miller,12.06
+Trent Richardson,11.20
+Le'Veon Bell,11.10
+Ryan Mathews,10.94
+C.J. Spiller,10.72
+Maurice Jones-Drew,10.67
+Stevan Ridley,10.49
+Jacquizz Rodgers,10.23
+Zac Stacy,9.57
+Chris Ogbonnaya,8.83
+BenJarvus Green-Ellis,8.43
+Chris Johnson,8.23
+Jason Snelling,8.02
+Mike Tolbert,7.23
+Roy Helu,7.12
+Brandon Bolden,7.00
+Joique Bell,6.77
+Willis McGahee,6.72
+Ben Tate,6.00
+Kendall Hunter,5.62
+Chris Ivory,4.72
+Dez Bryant,22.92
+Justin Blackmon,19.52
+Brandon Marshall,19.48
+DeSean Jackson,18.52
+A.J. Green,18.52
+Calvin Johnson,18.35
+Victor Cruz,18.28
+Vincent Jackson,17.78
+Josh Gordon,17.38
+Demaryius Thomas,17.22
+Reggie Wayne,17.15
+Wes Welker,16.57
+Mike Wallace,16.18
+Jordy Nelson,16.10
+Pierre Garcon,16.02
+Keenan Allen,15.97
+Eric Decker,15.73
+Hakeem Nicks,14.27
+T.Y. Hilton,14.12
+Antonio Brown,13.95
+Steve Smith,13.27
+Andre Johnson,12.60
+Alshon Jeffery,11.93
+Torrey Smith,11.53
+Brian Hartline,11.53
+Julian Edelman,11.52
+Kenbrell Thompkins,11.32
+Rueben Randle,11.25
+Jerome Simpson,11.13
+Vincent Brown,10.80
+Terrance Williams,10.80
+Harry Douglas,10.60
+Greg Jennings,10.58
+Kendall Wright,10.22
+Mike Williams,10.18
+Anquan Boldin,9.18
+Nate Washington,9.13
+Aaron Dobson,9.00
+Kris Durham,8.97
+Marlon Brown,8.92
+Austin Pettis,8.68
+Brandon LaFell,8.68
+Robert Woods,8.42
+Jeremy Kerley,8.30
+Emmanuel Sanders,8.28
+Chris Givens,7.22
+Riley Cooper,6.95
+Vernon Davis,17.33
+Tony Gonzalez,16.75
+Antonio Gates,15.15
+Rob Gronkowski,15.05
+Jermichael Finley,14.87
+Julius Thomas,14.83
+Jason Witten,14.25
+Jordan Cameron,13.85
+Martellus Bennett,13.45
+Heath Miller,11.50
+Kyle Rudolph,10.87
+Timothy Wright,9.82
+Coby Fleener,9.75
+Brent Celek,9.40
+Jordan Reed,8.95
+Scott Chandler,8.90
+Charles Clay,8.47
+Greg Olsen,7.92
+Jeff Cumberland,7.85
+Delanie Walker,7.57
+Chiefs,14.35
+Patriots,9.55
+49ers,9.20
+Panthers,8.85
+Steelers,8.40
+Ravens,7.00
+Dolphins,6.45
+Packers,6.40
+Chargers,6.20
+Bears,4.95
+Falcons,4.45
+Texans,4.20
+Buccaneers,3.80
+Lions,3.35
+Bengals,3.20
+Rams,3.00
+Titans,2.45
+Vikings,2.30
+Bills,2.00
+Redskins,1.80
+Giants,1.80
+Cowboys,1.50
+Broncos,1.20
+Browns,0.70
+Jaguars,0.60
+Jets,-0.30
+Eagles,-1.50
+Colts,-5.00
+Matt Prater,10.3
+Stephen Gostkowski,10.1
+Alex Henery,9.9
+Mason Crosby,9.7
+Matt Bryant,9.7
+Phil Dawson,9.6
+Ryan Succop,9.6
+Robbie Gould,9.6
+Steven Hauschka,9.5
+Adam Vinatieri,9.2
+Dan Bailey,9.1
+Nick Novak,9
+Caleb Sturgis,9
+David Akers,8.5
+Mike Nugent,8.3
+Kai Forbath,8.3
+Dan Carpenter,8.2
+Shaun Suisham,8.2
+Blair Walsh,8.1
+Josh Scobee,7.6
+Justin Tucker,7.5
+Graham Gano,7.3
+Rian Lindell,7.2
+Greg Zuerlein,7.2
+Josh Brown,6.9
+Nick Folk,6.8
+Billy Cundiff,6.6
+Randy Bullock,6
+Rob Bironas,5.9
+Jay Feely,4.8
