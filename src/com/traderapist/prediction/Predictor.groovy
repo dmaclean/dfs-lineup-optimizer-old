@@ -56,6 +56,11 @@ class Predictor {
 	def projections = [:]
 
 	/**
+	 * Map of players-->consistency stats.
+	 */
+	def consistency = [:]
+
+	/**
 	 * An array of maps that contain the options for positions at each depth.  So, if the
 	 * positionTypes string contains QB,RB,RB then the array will have three elements, at
 	 * 0 will be a map for QBs, and at 1 and 2 will be the map for RBs.
@@ -107,6 +112,11 @@ class Predictor {
 	 * to spend on remaining players to fill the roster.
 	 */
 	def budget
+
+	/**
+	 * Flag to determine if we are taking consistency/ceiling into account.
+	 */
+	def usingConsistency
 
 	/**
 	 * The lowest-priced player at each position.
@@ -328,7 +338,11 @@ class Predictor {
 				 */
 				if(sport == SPORT_BASEBALL)
 					p = normalizeBaseballPosition(p)
-				if(!projections[p].containsKey(name)) {
+				if(!projections[p]) {
+					println "No projection map for ${p}"
+					throw new RuntimeException("piss")
+				}
+				else if(!projections[p].containsKey(name)) {
 					println "Could not find a projection for ${name}"
 					continue
 				}
@@ -698,6 +712,22 @@ class Predictor {
 		printOptimalRoster()
 	}
 
+	def readConsistencies(file) {
+		new File(file).eachLine { line ->
+			def pieces = line.split(",")
+
+			def name = pieces[0].replaceAll("\"", "").replaceAll("\\.", "").trim().toLowerCase()
+			def position = pieces[1]
+			def floor = Double.parseDouble(pieces[14])
+			def ceiling = Double.parseDouble(pieces[15])
+			def consistent = Double.parseDouble(pieces[16])
+
+			if( (position == "QB" && consistent >= 60) || (position != "QB" && consistent >= 50)) {
+				consistency[name] = consistent
+			}
+		}
+	}
+
 	def cleanData() {
 		// Clear out any salaries that don't have projections.
 		def deletes = []
@@ -718,6 +748,16 @@ class Predictor {
 
 		deletes.each { name -> salaries.remove(name) }
 
+		// Clear out any salaries that aren't consistent players (if consistency is enabled).
+		if(usingConsistency) {
+			deletes.clear()
+			salaries.each { player, salary ->
+				if(!consistency[player])
+					deletes << player
+			}
+			deletes.each { name -> salaries.remove(name) }
+		}
+
 		// Clear out any projections that don't have salaries
 		deletes.clear()
 		projections.each { position, map ->
@@ -730,7 +770,7 @@ class Predictor {
 		if(args.length < 5 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${DRAFT_STREET}") ||
 				!args[1].matches("NumberFire|MyFantasyAssistant|DailyFantasyProjections|${BAYESFF}") ||
 				!args[2].matches("\\d+") || !args[4].matches("baseball|football")) {
-			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|DRAFT_STREET> <${BAYESFF}|NumberFire|MyFantasyAssistant|DailyFantasyProjections> <budget> <roster types> <baseball|football>"
+			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|DRAFT_STREET> <${BAYESFF}|NumberFire|MyFantasyAssistant|DailyFantasyProjections> <budget> <roster types> <baseball|football> <using consistency?>"
 			return false
 		}
 
@@ -740,7 +780,10 @@ class Predictor {
 	public static void main(String[] args) {
 		Predictor.validateInputs(args)
 
-		def p = new Predictor(site: args[0], projectionSource: args[1], budget: args[2].toInteger(), positionTypes: args[3], sport: args[4])
+		def usingConsistency = false
+		if(args.length >= 6)    usingConsistency = args[5] == "true"
+
+		def p = new Predictor(site: args[0], projectionSource: args[1], budget: args[2].toInteger(), positionTypes: args[3], sport: args[4], usingConsistency: usingConsistency)
 
 		p.run()
 	}

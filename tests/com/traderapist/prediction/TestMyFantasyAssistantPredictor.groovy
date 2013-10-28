@@ -184,4 +184,19 @@ class TestMyFantasyAssistantPredictor {
 
 		assert predictor.bestPoints == 25.5475
 	}
+
+	@Test
+	void testReadConsistency() {
+		predictor.site = Predictor.FAN_DUEL
+		predictor.positionTypes = "QB,RB,RB,WR,WR,TE"
+
+		predictor.readInputFootball("data/test/${predictor.site}/football.csv")
+		predictor.readSalaries("data/test/${predictor.site}/salaries_football.csv")
+		predictor.readConsistencies("data/test/consistency/consistency.csv")
+
+		predictor.cleanData()
+
+		assert !predictor.salaries["colin kaepernick"]
+		assert !predictor.projections["QB"]["colin kaepernick"]
+	}
 }

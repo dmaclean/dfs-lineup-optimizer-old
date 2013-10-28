@@ -216,4 +216,18 @@ class TestPredictor {
 
 		assert predictor.bestPoints > 156
 	}
+
+	@Test
+	void testReadConsistency() {
+		predictor.site = Predictor.FAN_DUEL
+		predictor.positionTypes = "QB,RB,RB,WR,WR,TE"
+
+		predictor.readConsistencies("data/test/consistency/consistency.csv")
+
+		assert !predictor.consistency["tom brady"]
+		assert !predictor.consistency["cj spiller"]
+		assert !predictor.consistency["maurice jones-drew"]
+
+		assert predictor.consistency["ej manuel"] == 60
+	}
 }

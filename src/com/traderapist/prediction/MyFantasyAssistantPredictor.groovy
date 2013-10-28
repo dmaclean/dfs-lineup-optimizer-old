@@ -92,6 +92,7 @@ class MyFantasyAssistantPredictor extends Predictor {
 			readInputBaseball(projectionFile)
 
 		readSalaries(salaryFile)
+		readConsistencies("data/consistency/consistency.csv")
 
 		cleanData()
 
@@ -109,7 +110,10 @@ class MyFantasyAssistantPredictor extends Predictor {
 	public static void main(String[] args) {
 		Predictor.validateInputs(args)
 
-		new MyFantasyAssistantPredictor(site: args[0], projectionSource: args[1], budget: args[2].toInteger(), positionTypes: args[3], sport: args[4])
+		def usingConsistency = false
+		if(args.length >= 6)    usingConsistency = args[5] == "true"
+
+		new MyFantasyAssistantPredictor(site: args[0], projectionSource: args[1], budget: args[2].toInteger(), positionTypes: args[3], sport: args[4], usingConsistency: usingConsistency)
 				.run()
 	}
 }
