@@ -133,6 +133,7 @@ class Predictor {
 
 	static def SPORT_BASEBALL = "baseball"
 	static def SPORT_FOOTBALL = "football"
+	static def SPORT_BASKETBALL = "basketball"
 
 	/*
 	 * Projection sources
@@ -298,6 +299,62 @@ class Predictor {
 									Math.min(minCost["2B"],
 									Math.min(minCost["3B"],
 									Math.min(minCost["SS"], minCost["OF"])))))
+	}
+
+	def readInputBasketball(file) {
+		new File(file).eachLine { line ->
+			def pieces = line.split(",")
+			def name = pieces[0]
+
+			/*
+			 * Grab the salary and figure out if this is the lowest value for this position.
+			 */
+			def salary = Integer.parseInt(pieces[3])
+			if(salary == 0)
+				return
+
+			/*
+			 * For baseball, we need to separate players that have two different positions
+			 * listed, such as 2B/RF.
+			 */
+			def positions = pieces[1]
+			if(pieces[1].indexOf("/") > -1) {
+				positions = pieces[1].split("/")
+			}
+			else {
+				positions = [positions]
+			}
+
+			for(position in positions) {
+				if(position.matches("LF|CF|RF")) {
+					position = "OF"
+				}
+				else if(position.matches("DH")) {
+					position = "1B"
+				}
+				else if(position.matches("SP|RP")) {
+					position = "P"
+				}
+
+				salaries[name] = salary
+				if(!minCost.containsKey(position))
+					minCost[position] = Integer.MAX_VALUE
+
+				if(salary > 0 && salary < minCost[position])
+					minCost[position] = salary
+
+				/*
+				 * Check if the map of projections for this position exists, and if not, create it.
+				 */
+				if(!projections.containsKey(position))
+					projections[position] = [:]
+				projections[position][name] = Double.parseDouble(pieces[2])
+
+//				if(position.matches("C|1B|2B|3B|SS|OF")) {
+//					projections["FLEX"][name] = Double.parseDouble(pieces[2])
+//				}
+			}
+		}
 	}
 
 	/**
@@ -699,6 +756,8 @@ class Predictor {
 			readInputFootball(file)
 		else if(sport == BaseballPredictor.SPORT_BASEBALL)
 			readInputBaseball(file)
+		else if(sport == Predictor.SPORT_BASKETBALL)
+			readInputBasketball(file)
 
 		initializePositionTypes()
 		table.initializeItemsList(positionTypes)
@@ -769,8 +828,8 @@ class Predictor {
 	static def validateInputs(args) {
 		if(args.length < 5 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${DRAFT_STREET}") ||
 				!args[1].matches("NumberFire|MyFantasyAssistant|DailyFantasyProjections|${BAYESFF}") ||
-				!args[2].matches("\\d+") || !args[4].matches("baseball|football")) {
-			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|DRAFT_STREET> <${BAYESFF}|NumberFire|MyFantasyAssistant|DailyFantasyProjections> <budget> <roster types> <baseball|football> <using consistency?>"
+				!args[2].matches("\\d+") || !args[4].matches("baseball|basketball|football")) {
+			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|DRAFT_STREET> <${BAYESFF}|NumberFire|MyFantasyAssistant|DailyFantasyProjections> <budget> <roster types> <baseball|basketball|football> <using consistency?>"
 			return false
 		}
 
