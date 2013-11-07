@@ -230,4 +230,74 @@ class TestPredictor {
 
 		assert predictor.consistency["ej manuel"] == 60
 	}
+
+	@Test
+	void testReadInputBasketball() {
+		predictor.positionTypes = "PG,PG,SG,SG,SF,SF,PF,PF,C"
+
+		predictor.readInputBasketball("data/test/FAN_DUEL_basketball.csv")
+
+		/*
+		 * PROJECTIONS
+		 */
+		assert predictor.projections.size() == 5
+		assert predictor.projections["PG"]["C.J. Watson(P)"] == 20.07
+		assert predictor.projections["PG"]["Jeff Teague"] == 32.06
+		assert predictor.projections["PG"]["Damian Lillard"] == 35.44
+
+		assert predictor.projections["SG"].size() == 3
+		assert predictor.projections["SG"]["Greivis Vasquez"] == 22.16
+		assert predictor.projections["SG"]["Nate Robinson"] == 18.11
+		assert predictor.projections["SG"]["Alec Burks"] == 22.78
+
+		assert predictor.projections["SF"].size() == 3
+		assert predictor.projections["SF"]["Wesley Johnson"] == 16.82
+		assert predictor.projections["SF"]["Omri Casspi"] == 17.31
+		assert predictor.projections["SF"]["Francisco Garcia"] == 14.35
+
+		assert predictor.projections["PF"].size() == 3
+		assert predictor.projections["PF"]["Andre Drummond"] == 33.59
+		assert predictor.projections["PF"]["Udonis Haslem"] == 14.15
+		assert predictor.projections["PF"]["LaMarcus Aldridge"] == 39.2
+
+		assert predictor.projections["C"].size() == 3
+		assert predictor.projections["C"]["Tyson Chandler"] == 27.24
+		assert predictor.projections["C"]["Brook Lopez"] == 29.13
+		assert predictor.projections["C"]["Greg Monroe"] == 29.79
+
+
+		/*
+		 * SALARIES
+		 */
+		assert predictor.salaries.size() == 15
+		assert predictor.salaries["C.J. Watson(P)"] == 5000
+		assert predictor.salaries["Jeff Teague"] == 11850
+		assert predictor.salaries["Damian Lillard"] == 13250
+
+		assert predictor.salaries["Greivis Vasquez"] == 7100
+		assert predictor.salaries["Nate Robinson"] == 6100
+		assert predictor.salaries["Alec Burks"] == 8500
+
+		assert predictor.salaries["Wesley Johnson"] == 5000
+		assert predictor.salaries["Omri Casspi"] == 5750
+		assert predictor.salaries["Francisco Garcia"] == 5000
+
+		assert predictor.salaries["Andre Drummond"] == 11750
+		assert predictor.salaries["Udonis Haslem"] == 5000
+		assert predictor.salaries["LaMarcus Aldridge"] == 13900
+
+		assert predictor.salaries["Tyson Chandler"] == 10100
+		assert predictor.salaries["Brook Lopez"] == 10900
+		assert predictor.salaries["Greg Monroe"] == 11800
+
+		/*
+		 * MIN COST
+		 */
+		assert predictor.minCost.size() == 5
+		assert predictor.minCost["PG"] == 5000
+		assert predictor.minCost["SG"] == 6100
+		assert predictor.minCost["SF"] == 5000
+		assert predictor.minCost["PF"] == 5000
+		assert predictor.minCost["C"] == 10100
+	}
 }

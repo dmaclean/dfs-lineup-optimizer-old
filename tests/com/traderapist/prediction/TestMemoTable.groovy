@@ -72,12 +72,67 @@ class TestMemoTable{
 
         assert table.items[0].size() == 1
 
-        MemoItem dupe = new MemoItem(cost: 3500, points: 200, roster: ["Dan"])
+        MemoItem dupe = new MemoItem(cost: 3500, points: 200, roster: ["Better"])
         table.writeSolution(0, dupe)
 
         assert table.items[0].size() == 1
-        assert table.items[0][0].points == 200
+        assert table.items[0][0].points == 200 && table.items[0][0].roster == ["Better"]
     }
+
+	@Test
+	void testWriteSolution_NonOverlappingItems() {
+		table.initializeItemsList("QB")
+
+		/*
+		 * Write entries into the table.
+		 */
+		MemoItem item = new MemoItem(cost: 3500, points: 100, roster: ["Dan"])
+		table.writeSolution(0, item)
+
+		assert table.items[0].size() == 1
+
+		item = new MemoItem(cost: 4000, points: 110, roster: ["Tom"])
+		table.writeSolution(0, item)
+
+		assert table.items[0].size() == 2
+
+		/*
+		 * Read entries from the table.
+		 */
+		item = table.getSolution(0, 3500)
+		assert item.points == 100 && item.roster == ["Dan"]
+
+		item = table.getSolution(0, 4000)
+		assert item.points == 110 && item.roster == ["Tom"]
+
+		assert table.getSolution(0, 3800) == null
+	}
+
+	@Test
+	void testWriteSolution_NonOverlappingItems_2() {
+		table.initializeItemsList("QB,RB")
+
+		/*
+		 * Write entries into the table.
+		 */
+		MemoItem item = new MemoItem(cost: 3500, points: 100, roster: ["Dan"])
+		table.writeSolution(0, item)
+
+		assert table.items[0].size() == 1
+
+		item = new MemoItem(cost: 4000, points: 110, roster: ["Tom"])
+		table.writeSolution(0, item)
+
+		assert table.items[0].size() == 2
+
+		item = new MemoItem(cost: 3800, points: 120, roster: ["RB,Dan"])
+		table.writeSolution(1, item)
+		assert table.items[1].size() == 1
+
+		item = new MemoItem(cost: 3900, points: 125, roster: ["RB2,Tom"])
+		table.writeSolution(1, item)
+		assert table.items[1].size() == 2
+	}
 
 	@Test
 	void testInitializeItemList_QB() {
