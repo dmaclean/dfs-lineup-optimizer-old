@@ -526,7 +526,10 @@ class Predictor {
 			}
 		}
 
-		// No previous index, whatever was passed in is fine.
+		// No previous index or the previous one is pointing to a player that is
+		// earlier in the list than the player at this index.
+		//
+		// Whatever was passed in is fine.
 		if(closestIndex == -1 || indexTracker[closestIndex] < index) {
 			return true
 		}
