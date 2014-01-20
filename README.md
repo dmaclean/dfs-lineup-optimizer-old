@@ -2,13 +2,14 @@ one-day-fantasy-leagues
 =======================
 This application takes in fantasy projections and salary data for One-Day Fantasy Leagues and uses dynamic programming to compute the optimal roster.
 
-The data comes from (right now) three separate sources:
+The data can come from any source, but needs to be in the format of <player name>,<position(s)>,<projection>,<salary>.
 
-<h3>NumberFire</h3>
-NumberFire provides fantasy projections and salary data, so we can actually get it all from one source.  For this source, we grab data from the projection table on the site, parse out the player name, position, projection, and salary, and add that to the appropriate CSV file under data/numberfire.<br/>
-The NumberFireProjector, given the appopriate parameters, will read projections and salary from this file and perform the configuration.
+The application takes the following arguments:
+1- Site name (this can be one of DRAFTDAY, DRAFTKINGS, DRAFTSTREET, FANDUEL, STARSTREET)
+2- Total salary available
+3- Roster composition (i.e. StarStreet NBA would be PG,SG,SF,PF,C,G,F,C,FLEX,FLEX)
+4- Sport (basketball|football)
 
-<h3>MyFantasyAssistant.com</h3>
-MyFantasyAssistant provides projections only.  Because of this, we need to grab salary data from the ODFL site and put it in its own CSV file.  From here, the application will parse the projection and salary files separately, clean the data (delete projection entries with no corresponding salary, and vice-versa), and generate a projection.
+The input file should be placed in the data/ directory and have a naming convention of <site name>_<sport>.csv.  This will be properly picked up, parsed, and analyzed.
 
-<h3>DailyFantasyProjections.com</h3>
+Processing for all sites but DraftStreet should take about 4 seconds at the most.  Once processing is done, the lineup that yields the most points based on the provided projections given the salary constraints is displayed.
