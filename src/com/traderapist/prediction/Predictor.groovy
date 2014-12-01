@@ -128,8 +128,8 @@ class Predictor {
 	def count = 0
 
 	static def DRAFT_KINGS = "DRAFT_KINGS"
-	static def DRAFT_STREET = "DRAFT_STREET"
 	static def FAN_DUEL = "FAN_DUEL"
+    static def VICTIV = "VICTIV"
 
 	static def SPORT_BASEBALL = "baseball"
 	static def SPORT_FOOTBALL = "football"
@@ -753,13 +753,13 @@ class Predictor {
 	}
 
 	def run() {
-		def file = "data/numberfire/${site}_${sport}.csv"
+		def file = "data/${site}_${sport}.csv"
 
-		if(sport == BaseballPredictor.SPORT_FOOTBALL)
+		if(sport == SPORT_FOOTBALL)
 			readInputFootball(file)
-		else if(sport == BaseballPredictor.SPORT_BASEBALL)
+		else if(sport == SPORT_BASEBALL)
 			readInputBaseball(file)
-		else if(sport == Predictor.SPORT_BASKETBALL)
+		else if(sport == SPORT_BASKETBALL)
 			readInputBasketball(file)
 
 		initializePositionTypes()
@@ -829,10 +829,9 @@ class Predictor {
 	}
 
 	static def validateInputs(args) {
-		if(args.length < 5 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${DRAFT_STREET}") ||
-				!args[1].matches("NumberFire|MyFantasyAssistant|DailyFantasyProjections|${BAYESFF}") ||
-				!args[2].matches("\\d+") || !args[4].matches("baseball|basketball|football")) {
-			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|DRAFT_STREET> <${BAYESFF}|NumberFire|MyFantasyAssistant|DailyFantasyProjections> <budget> <roster types> <baseball|basketball|football> <using consistency?>"
+		if(args.length < 4 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${VICTIV}") ||
+				!args[1].matches("\\d+") || !args[3].matches("${SPORT_BASEBALL}|${SPORT_FOOTBALL}|${SPORT_BASKETBALL}")) {
+			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|VICTIV> <budget> <roster types> <baseball|basketball|football> <using consistency?>"
 			return false
 		}
 
@@ -843,9 +842,9 @@ class Predictor {
 		Predictor.validateInputs(args)
 
 		def usingConsistency = false
-		if(args.length >= 6)    usingConsistency = args[5] == "true"
+		if(args.length >= 5)    usingConsistency = args[4] == "true"
 
-		def p = new Predictor(site: args[0], projectionSource: args[1], budget: args[2].toInteger(), positionTypes: args[3], sport: args[4], usingConsistency: usingConsistency)
+		def p = new Predictor(site: args[0], budget: args[1].toInteger(), positionTypes: args[2], sport: args[3], usingConsistency: usingConsistency)
 
 		p.run()
 	}
