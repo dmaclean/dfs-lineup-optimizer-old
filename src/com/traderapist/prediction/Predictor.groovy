@@ -134,6 +134,7 @@ class Predictor {
 	static def SPORT_BASEBALL = "baseball"
 	static def SPORT_FOOTBALL = "football"
 	static def SPORT_BASKETBALL = "basketball"
+    static def SPORT_GOLF = "golf"
 
 	/*
 	 * Projection sources
@@ -222,6 +223,34 @@ class Predictor {
 		// Figure out the smallest FLEX cost
 		minCost["FLEX"] = Math.min(minCost["RB"], Math.min(minCost["WR"], minCost["TE"]))
 	}
+
+    def readInputGolf(file) {
+        new File(file).eachLine { line ->
+            def pieces = line.split(",")
+            def name = pieces[0]
+
+            /*
+             * Grab the salary and figure out if this is the lowest value for this position.
+             */
+            def salary = Integer.parseInt(pieces[3])
+            if(salary == 0)
+                return
+
+            salaries[name] = salary
+            if(!minCost.containsKey(pieces[1]))
+                minCost[pieces[1]] = Integer.MAX_VALUE
+
+            if(salary > 0 && salary < minCost[pieces[1]])
+                minCost[pieces[1]] = salary
+
+            /*
+             * Check if the map of projections for this position exists, and if not, create it.
+             */
+            if(!projections.containsKey(pieces[1]))
+                projections[pieces[1]] = [:]
+            projections[pieces[1]][name] = Double.parseDouble(pieces[2])
+        }
+    }
 
 	/**
 	 * Expect input in the form of <name>,<position>,<fantasy points>,<salary>
@@ -340,8 +369,31 @@ class Predictor {
 				if(!minCost.containsKey(position))
 					minCost[position] = Integer.MAX_VALUE
 
+				// Account for G and F
+				if(position.matches("SF|PF")) {
+					if(!minCost.containsKey("F")) {
+						minCost["F"] = Integer.MAX_VALUE
+					}
+					if(salary > 0 && salary < minCost["F"]) {
+						minCost["F"] = salary
+					}
+				} else if(position.matches("PG|SG")) {
+					if(!minCost.containsKey("G")) {
+						minCost["G"] = Integer.MAX_VALUE
+					}
+					if(salary > 0 && salary < minCost["G"]) {
+						minCost["G"] = salary
+					}
+				}
+
 				if(salary > 0 && salary < minCost[position])
 					minCost[position] = salary
+
+				if(!minCost.containsKey("FLEX")) {
+					minCost["FLEX"] = Integer.MAX_VALUE
+				}
+				if(salary > 0 && salary < minCost["FLEX"])
+					minCost["FLEX"] = salary
 
 				/*
 				 * Check if the map of projections for this position exists, and if not, create it.
@@ -350,9 +402,22 @@ class Predictor {
 					projections[position] = [:]
 				projections[position][name] = Double.parseDouble(pieces[2])
 
-//				if(position.matches("C|1B|2B|3B|SS|OF")) {
-//					projections["FLEX"][name] = Double.parseDouble(pieces[2])
-//				}
+				if(position.matches("SF|PF")) {
+					if(!projections.containsKey("F")) {
+						projections["F"] = [:]
+					}
+					projections["F"][name] = Double.parseDouble(pieces[2])
+				} else if(position.matches("PG|SG")) {
+					if(!projections.containsKey("G")) {
+						projections["G"] = [:]
+					}
+					projections["G"][name] = Double.parseDouble(pieces[2])
+				}
+
+				if(!projections.containsKey("FLEX")) {
+					projections["FLEX"] = [:]
+				}
+				projections["FLEX"][name] = Double.parseDouble(pieces[2])
 			}
 		}
 	}
@@ -761,6 +826,8 @@ class Predictor {
 			readInputBaseball(file)
 		else if(sport == SPORT_BASKETBALL)
 			readInputBasketball(file)
+        else if(sport == SPORT_GOLF)
+            readInputGolf(file)
 
 		initializePositionTypes()
 		table.initializeItemsList(positionTypes)
@@ -830,8 +897,8 @@ class Predictor {
 
 	static def validateInputs(args) {
 		if(args.length < 4 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${VICTIV}") ||
-				!args[1].matches("\\d+") || !args[3].matches("${SPORT_BASEBALL}|${SPORT_FOOTBALL}|${SPORT_BASKETBALL}")) {
-			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|VICTIV> <budget> <roster types> <baseball|basketball|football> <using consistency?>"
+				!args[1].matches("\\d+") || !args[3].matches("${SPORT_BASEBALL}|${SPORT_FOOTBALL}|${SPORT_BASKETBALL}|${SPORT_GOLF}")) {
+			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|VICTIV> <budget> <roster types> <baseball|basketball|football|golf> <using consistency?>"
 			return false
 		}
 
