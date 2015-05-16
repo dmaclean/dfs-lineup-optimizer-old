@@ -303,6 +303,10 @@ class Predictor {
 					position = "P"
 				}
 
+                if(site == VICTIV && position.matches("C|1B|2B|3B|SS")) {
+                    position = "IF";
+                }
+
 				salaries[name] = salary
 				if(!minCost.containsKey(position))
 					minCost[position] = Integer.MAX_VALUE
@@ -323,11 +327,15 @@ class Predictor {
 			}
 		}
 
-		minCost["FLEX"] = Math.min(minCost["C"],
-									Math.min(minCost["1B"],
-									Math.min(minCost["2B"],
-									Math.min(minCost["3B"],
-									Math.min(minCost["SS"], minCost["OF"])))))
+        if(site != VICTIV) {
+            minCost["FLEX"] = Math.min(minCost["C"],
+                    Math.min(minCost["1B"],
+                            Math.min(minCost["2B"],
+                                    Math.min(minCost["3B"],
+                                            Math.min(minCost["SS"], minCost["OF"])))))
+        } else {
+            minCost["FLEX"] = Math.min(minCost["IF"], minCost["OF"])
+        }
 	}
 
 	def readInputBasketball(file) {
@@ -795,7 +803,11 @@ class Predictor {
 	 * @return              The new position name.
 	 */
 	def normalizeBaseballPosition(position) {
-		if(position.matches("LF|CF|RF")) {
+        if(site == VICTIV && position.matches("C|1B|2B|3B|SS")) {
+            return "IF";
+        }
+
+        if(position.matches("LF|CF|RF")) {
 			return "OF"
 		}
 		else if(position.matches("DH")) {
