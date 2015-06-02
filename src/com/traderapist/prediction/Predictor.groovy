@@ -13,19 +13,12 @@ class Predictor {
 	def site
 
 	/**
-	 * The service we are getting projections from.
-	 *
-	 * - NumberFire
-	 * - MyFantasyAssistant
-	 * - DailyFantasyProjections
-	 */
-	def projectionSource
-
-	/**
 	 * Which sport are we predicting for?
 	 *
 	 * - baseball
 	 * - football
+	 * - basketball
+	 * - golf
 	 */
 	def sport
 
@@ -119,6 +112,18 @@ class Predictor {
 	def usingConsistency
 
 	/**
+	 * The minimum salary an athlete can be at and still be considered for rostering.  This is
+	 * helpful for cash games to create a more balanced lineup.
+	 */
+	def minUsableSalary
+
+	/**
+	 * The maximum salary an athlete can be at and still be considered for rostering.  This is
+	 * helpful for cash games to create a more balanced lineup.
+	 */
+	def maxUsableSalary
+
+	/**
 	 * The lowest-priced player at each position.
 	 */
 	def minCost = [:]
@@ -135,11 +140,6 @@ class Predictor {
 	static def SPORT_FOOTBALL = "football"
 	static def SPORT_BASKETBALL = "basketball"
     static def SPORT_GOLF = "golf"
-
-	/*
-	 * Projection sources
-	 */
-	static def BAYESFF = "BayesFF"
 
 	def initializePositionTypes() {
 		def pieces = positionTypes.split(",")
@@ -277,7 +277,7 @@ class Predictor {
 			 * Grab the salary and figure out if this is the lowest value for this position.
 			 */
 			def salary = Integer.parseInt(pieces[3])
-			if(salary == 0)
+			if(salary == 0 || salary < minUsableSalary || salary > maxUsableSalary)
 				return
 
 			/*
@@ -428,69 +428,6 @@ class Predictor {
 				projections["FLEX"][name] = Double.parseDouble(pieces[2])
 			}
 		}
-	}
-
-	/**
-	 * Expect input in the form of <name>,<position>,<salary>
-	 *
-	 * FanDuel
-	 * <tr.*?><td.*?><span>(\w+)<\/span><\/td><td><div.*?>([\w\. ]+)(<span class="icon-\w+">\w+<\/span>)?<\/div><\/td><td>.*?<\/td><td>.*?<\/td><td>.*?<\/td><td>\$(.*?),(\d+)<\/td>.*?<\/tr>
-	 * \2,\1,\4\5\n
-	 *
-	 * @return
-	 */
-	def readSalaries(file) {
-		new File(file).eachLine { line ->
-			def pieces = line.split(",")
-			def name = pieces[0].replaceAll("\"", "").replaceAll("\\.", "").trim().toLowerCase()
-			def position = pieces[1]
-			def salary = pieces[2].toInteger()
-
-			/*
-			 * Football defense names come in different forms depending on the site we're using.
-			 * For example, Draft Kings uses "<team name>" while FanDuel uses "<city> <team name>".
-			 *
-			 * We need to normalize this so defenses don't get filtered out when we do data cleaning.
-			 */
-			if(sport == SPORT_FOOTBALL && position == "DEF")
-				name = normalizeFootballTeamName(name)
-
-			if(salaries.containsKey(name)) {
-				println "Salaries already contains ${ name }"
-				return false
-			}
-
-			def positions = (position.contains("/")) ? position.split("/") : [position]
-			for(p in positions) {
-				/*
-				 * For baseball, make sure we normalize the positions because sometimes, for
-				 * instance, a pitcher will come over as SP or RP and needs to be P.
-				 */
-				if(sport == SPORT_BASEBALL)
-					p = normalizeBaseballPosition(p)
-				if(!projections[p]) {
-					println "No projection map for ${p}"
-					throw new RuntimeException("piss")
-				}
-				else if(!projections[p].containsKey(name)) {
-					println "Could not find a projection for ${name}"
-					continue
-				}
-
-				salaries[name] = salary
-				if(!minCost.containsKey(p))
-					minCost[p] = Integer.MAX_VALUE
-
-				if(salary > 0 && salary < minCost[p])
-					minCost[p] = salary
-
-				salaries[name] = salary
-			}
-		}
-
-		// Figure out the smallest FLEX cost
-		if(sport == SPORT_FOOTBALL)
-			minCost["FLEX"] = Math.min(minCost["RB"], Math.min(minCost["WR"], minCost["TE"]))
 	}
 
 	def reportTableStats() {
@@ -869,48 +806,10 @@ class Predictor {
 		}
 	}
 
-	def cleanData() {
-		// Clear out any salaries that don't have projections.
-		def deletes = []
-		salaries.each { name, salary ->
-			def points = null
-
-			projections.each { position, map ->
-				if(!points && (points = map[name]) != null) {
-					return
-				}
-			}
-
-			if(!points) {
-				println "Could not find projection for ${ name }, deleting..."
-				deletes << name
-			}
-		}
-
-		deletes.each { name -> salaries.remove(name) }
-
-		// Clear out any salaries that aren't consistent players (if consistency is enabled).
-		if(usingConsistency) {
-			deletes.clear()
-			salaries.each { player, salary ->
-				if(!consistency[player])
-					deletes << player
-			}
-			deletes.each { name -> salaries.remove(name) }
-		}
-
-		// Clear out any projections that don't have salaries
-		deletes.clear()
-		projections.each { position, map ->
-			map.each { k,v -> if(!salaries[k]) deletes << k}
-			deletes.each { name -> map.remove(name) }
-		}
-	}
-
 	static def validateInputs(args) {
 		if(args.length < 4 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${VICTIV}") ||
 				!args[1].matches("\\d+") || !args[3].matches("${SPORT_BASEBALL}|${SPORT_FOOTBALL}|${SPORT_BASKETBALL}|${SPORT_GOLF}")) {
-			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|VICTIV> <budget> <roster types> <baseball|basketball|football|golf> <using consistency?>"
+			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|VICTIV> <budget> <roster types> <baseball|basketball|football|golf> <min salary> <max salary>"
 			return false
 		}
 
@@ -918,12 +817,15 @@ class Predictor {
 	}
 
 	public static void main(String[] args) {
-		Predictor.validateInputs(args)
+		validateInputs(args)
 
-		def usingConsistency = false
-		if(args.length >= 5)    usingConsistency = args[4] == "true"
+		def minUsableSalary = 0
+		def maxUsableSalary = Integer.MAX_VALUE
+		if(args.length >= 5)    minUsableSalary = Integer.parseInt(args[4])
+		if(args.length >= 6)    maxUsableSalary = Integer.parseInt(args[5])
 
-		def p = new Predictor(site: args[0], budget: args[1].toInteger(), positionTypes: args[2], sport: args[3], usingConsistency: usingConsistency)
+		def p = new Predictor(site: args[0], budget: args[1].toInteger(), positionTypes: args[2], sport: args[3],
+				minUsableSalary: minUsableSalary, maxUsableSalary: maxUsableSalary)
 
 		p.run()
 	}
