@@ -1,4 +1,9 @@
 package com.traderapist.prediction
+
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
+
 /**
  * Created with IntelliJ IDEA.
  * User: dmaclean
@@ -124,6 +129,11 @@ class Predictor {
 	def maxUsableSalary
 
 	/**
+	 * Flag to indicate if we want to parse FantasyPros projections or use what is in the CSVs.
+	 */
+	def useFantasyPros
+
+	/**
 	 * The lowest-priced player at each position.
 	 */
 	def minCost = [:]
@@ -135,6 +145,7 @@ class Predictor {
 	static def DRAFT_KINGS = "DRAFT_KINGS"
 	static def FAN_DUEL = "FAN_DUEL"
     static def VICTIV = "VICTIV"
+	static def YAHOO = "YAHOO"
 
 	static def SPORT_BASEBALL = "baseball"
 	static def SPORT_FOOTBALL = "football"
@@ -253,23 +264,16 @@ class Predictor {
     }
 
 	/**
+	 * Take the input data for optimizations and parse names, positions, projections, and salaries.
+	 *
 	 * Expect input in the form of <name>,<position>,<fantasy points>,<salary>
 	 *
-	 * FOOTBALL
-	 * <tr.*?><td.*?><a.*?>(.*?) \(([A-Z]+), [A-Z]+\)<\/a>.*?(<td class="nf strong">(.*?)<\/td>)<td.*?>.*?<\/td><td>\$(\d+)<\/td>.*?<\/tr>
-	 * \1,\2,\4,\5\n
-	 *
-	 * BASEBALL
-	 * <tr.*?><td.*?>\*?<a.*?>(.*?) \(([\d\/A-Z]+), [A-Z]+\)<\/a><\/td>(<td.*?>[\d\.]+<\/td>){0,13}<td class="sep">([\d\.]+)<\/td><td>\$(\d+)<\/td>.*?<\/tr>
-	 * \1,\2,\4,\5\n
-	 *
-	 * @param file
-	 * @return
+	 * @param data		A list of Strings in the format of <name>,<position>,<fantasy points>,<salary>
 	 */
-	def readInputBaseball(file) {
+	def readInputBaseball(List<String> data) {
 		projections["FLEX"] = [:]
 
-		new File(file).eachLine { line ->
+		data.each { line ->
 			def pieces = line.split(",")
 			def name = pieces[0]
 
@@ -767,12 +771,19 @@ class Predictor {
 	}
 
 	def run() {
+		// First read in what's stored in the CSV file.
 		def file = "data/${site}_${sport}.csv"
+		def data = new File(file).readLines()
+
+		// If we're using FantasyPros, go scrape that and override the data array.
+		if(useFantasyPros) {
+			data = scrapeFantasyPros()
+		}
 
 		if(sport == SPORT_FOOTBALL)
 			readInputFootball(file)
 		else if(sport == SPORT_BASEBALL)
-			readInputBaseball(file)
+			readInputBaseball(data)
 		else if(sport == SPORT_BASKETBALL)
 			readInputBasketball(file)
         else if(sport == SPORT_GOLF)
@@ -788,6 +799,86 @@ class Predictor {
 		println "Computed optimal roster in ${ (end-start)/1000.0 } seconds."
 
 		printOptimalRoster()
+	}
+
+	/**
+	 * Scrape FantasyPros projections and format them into the <name>,<position>,<projection>,<salary> strings
+	 * that can be processed by the optimizer.
+	 *
+	 * @return	A list of comma-separated values; one for each athlete.
+	 */
+	def scrapeFantasyPros() {
+		// Determine the name of the cheat sheet to use based on the site we're creating lineups for.
+		def siteUrl = site == YAHOO ? "yahoo" : site == DRAFT_KINGS ? "draftkings" : "fanduel"
+
+		// Process Pitchers
+		def playersData = []
+		def data = new URL("http://www.fantasypros.com/mlb/${siteUrl}-cheatsheet.php").getText()
+		Document doc = Jsoup.parse(data)
+		Element table = doc.getElementById("data-table")
+		def processedFirstRow = false
+		table.getElementsByTag("tr").each {Element tr ->
+			if(!processedFirstRow) {
+				processedFirstRow = true
+				return
+			}
+
+			def playerData = ""
+			def name = null
+			def position  = null
+			def time = null
+			def projection = null
+			def salary = null
+			tr.getElementsByTag("td").eachWithIndex {Element td, i ->
+				if(i == 0) {
+					playerData += td.getElementsByTag("a").get(0).text() + ",P,"
+				} else if(i == 2) {
+					time = td.text()
+				} else if(i == 10) {
+					playerData += td.text().replace(" pts", "") + ","
+				} else if(i == 11) {
+					playerData += td.text().replace("\$", "").replace(",","") + ","
+				}
+
+			}
+			playerData += time
+			playersData.add(playerData)
+		}
+
+		// Process batters
+		data = new URL("http://www.fantasypros.com/mlb/${siteUrl}-cheatsheet.php?position=H").getText()
+		doc = Jsoup.parse(data)
+		table = doc.getElementById("data-table")
+		processedFirstRow = false
+		table.getElementsByTag("tr").each { Element tr ->
+			if (!processedFirstRow) {
+				processedFirstRow = true
+				return
+			}
+
+			def playerData = ""
+			def name = null
+			def position = null
+			def time = null
+			def projection = null
+			def salary = null
+			tr.getElementsByTag("td").eachWithIndex { Element td, i ->
+				if (i == 0) {
+					playerData += td.getElementsByTag("a").get(0).text() + ","
+					playerData += td.getElementsByTag("small").get(0).text().replaceFirst("\\(\\w+ - ", "").replace(")", "") + ","
+				} else if (i == 3) {
+					time = td.text()
+				} else if (i == 11) {
+					playerData += td.text().replace(" pts", "") + ","
+				} else if (i == 12) {
+					playerData += td.text().replace("\$", "").replace(",", "") + ","
+				}
+			}
+			playerData += time
+			playersData.add(playerData)
+		}
+
+		return playersData
 	}
 
 	def readConsistencies(file) {
@@ -807,9 +898,9 @@ class Predictor {
 	}
 
 	static def validateInputs(args) {
-		if(args.length < 4 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${VICTIV}") ||
+		if(args.length < 4 || !args[0].matches("${FAN_DUEL}|${DRAFT_KINGS}|${VICTIV}|${YAHOO}") ||
 				!args[1].matches("\\d+") || !args[3].matches("${SPORT_BASEBALL}|${SPORT_FOOTBALL}|${SPORT_BASKETBALL}|${SPORT_GOLF}")) {
-			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|VICTIV> <budget> <roster types> <baseball|basketball|football|golf> <min salary> <max salary>"
+			println "Usage: Predictor <FAN_DUEL|DRAFT_KINGS|VICTIV|YAHOO> <budget> <roster types> <baseball|basketball|football|golf> <min salary> <max salary> <use fantasy-pros>"
 			return false
 		}
 
@@ -821,11 +912,13 @@ class Predictor {
 
 		def minUsableSalary = 0
 		def maxUsableSalary = Integer.MAX_VALUE
-		if(args.length >= 5)    minUsableSalary = Integer.parseInt(args[4])
-		if(args.length >= 6)    maxUsableSalary = Integer.parseInt(args[5])
+		def useFantasyPros = false
+		if(args.length >= 5)	useFantasyPros = true
+		if(args.length >= 6)    minUsableSalary = Integer.parseInt(args[5])
+		if(args.length >= 7)    maxUsableSalary = Integer.parseInt(args[6])
 
 		def p = new Predictor(site: args[0], budget: args[1].toInteger(), positionTypes: args[2], sport: args[3],
-				minUsableSalary: minUsableSalary, maxUsableSalary: maxUsableSalary)
+				minUsableSalary: minUsableSalary, maxUsableSalary: maxUsableSalary, useFantasyPros: useFantasyPros)
 
 		p.run()
 	}
