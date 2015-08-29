@@ -824,16 +824,15 @@ class Predictor {
 			}
 
 			def playerData = ""
-			def name = null
-			def position  = null
 			def time = null
-			def projection = null
-			def salary = null
+			def opponent = null
 			tr.getElementsByTag("td").eachWithIndex {Element td, i ->
 				if(i == 0) {
 					playerData += td.getElementsByTag("a").get(0).text() + ",P,"
 				} else if(i == 2) {
 					time = td.text()
+				} else if(i == 3) {
+					opponent = td.text().replace("@","")
 				} else if(i == 10) {
 					playerData += td.text().replace(" pts", "") + ","
 				} else if(i == 11) {
@@ -841,7 +840,7 @@ class Predictor {
 				}
 
 			}
-			playerData += time
+			playerData += time + "," + opponent
 			playersData.add(playerData)
 		}
 
@@ -857,24 +856,34 @@ class Predictor {
 			}
 
 			def playerData = ""
-			def name = null
-			def position = null
 			def time = null
-			def projection = null
-			def salary = null
+			def battingOrder = null
+			def opponent = null
 			tr.getElementsByTag("td").eachWithIndex { Element td, i ->
 				if (i == 0) {
 					playerData += td.getElementsByTag("a").get(0).text() + ","
 					playerData += td.getElementsByTag("small").get(0).text().replaceFirst("\\(\\w+ - ", "").replace(")", "") + ","
+				} else if (i == 2) {
+					battingOrder = td.text()
 				} else if (i == 3) {
 					time = td.text()
+				} else if (i == 4) {
+					opponent = td.text().replace("@","")
+				} else if (i == 5 && td.className().equals("tough-highlighted")) {
+					return;
 				} else if (i == 11) {
 					playerData += td.text().replace(" pts", "") + ","
 				} else if (i == 12) {
 					playerData += td.text().replace("\$", "").replace(",", "") + ","
 				}
 			}
-			playerData += time
+
+			// Don't add the batter if they're not in the lineup
+			if(battingOrder.equals("X")) {
+				return
+			}
+
+			playerData += time + "," + opponent
 			playersData.add(playerData)
 		}
 
