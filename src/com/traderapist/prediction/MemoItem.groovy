@@ -25,13 +25,6 @@ class MemoItem implements Comparable<MemoItem> {
 
 	@Override
 	int compareTo(MemoItem t) {
-		if(cost < t.cost) {
-			return -1
-		}
-		else if(cost > t.cost) {
-			return 1
-		}
-
-		return 0
+		return cost.compareTo(t.cost)
 	}
 }
