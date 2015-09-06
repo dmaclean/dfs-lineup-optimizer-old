@@ -826,6 +826,7 @@ class Predictor {
 		def siteUrl = site == YAHOO ? "yahoo" : site == DRAFT_KINGS ? "draftkings" : "fanduel"
 
 		// Process Pitchers
+		def pitchersByFantasyPoints = []
 		def playersData = []
 		def data = new URL("http://www.fantasypros.com/mlb/${siteUrl}-cheatsheet.php").getText()
 		Document doc = Jsoup.parse(data)
@@ -839,10 +840,12 @@ class Predictor {
 
 			def playerData = ""
 			def time = null
+			def team = null
 			def opponent = null
 			tr.getElementsByTag("td").eachWithIndex {Element td, i ->
 				if(i == 0) {
 					playerData += td.getElementsByTag("a").get(0).text() + ",P,"
+					team = td.getElementsByTag("small").get(0).text().replace("(", "").replace(" - P)", "")
 				} else if(i == 2) {
 					time = td.text()
 				} else if(i == 3) {
@@ -855,8 +858,18 @@ class Predictor {
 
 			}
 			playerData += time + "," + opponent
+
+			// The closers get listed in the pitcher list as well.  Since the list is sorted by fantasy points,
+			// we know the starters will be listed first
+			if(pitchersByFantasyPoints.contains(team)) {
+				return
+			}
 			playersData.add(playerData)
+			pitchersByFantasyPoints.add(team)
 		}
+
+		// Create a filter for the top half of pitchers.  If a batter is facing one of these pitchers/teams, skip them.
+		pitchersByFantasyPoints = pitchersByFantasyPoints.subList(0, pitchersByFantasyPoints.size()/2 as int)
 
 		// Process batters
 		data = new URL("http://www.fantasypros.com/mlb/${siteUrl}-cheatsheet.php?position=H").getText()
@@ -873,6 +886,7 @@ class Predictor {
 			def time = null
 			def battingOrder = null
 			def opponent = null
+			def skip = false
 			tr.getElementsByTag("td").eachWithIndex { Element td, i ->
 				if (i == 0) {
 					playerData += td.getElementsByTag("a").get(0).text() + ","
@@ -883,6 +897,11 @@ class Predictor {
 					time = td.text()
 				} else if (i == 4) {
 					opponent = td.text().replace("@","")
+
+					// Batter has less-than optimal matchup.  Skip them.
+					if(pitchersByFantasyPoints.contains(opponent)) {
+						skip = true
+					}
 				} else if (i == 5 && td.className().equals("tough-highlighted")) {
 					return;
 				} else if (i == 11) {
@@ -893,7 +912,7 @@ class Predictor {
 			}
 
 			// Don't add the batter if they're not in the lineup
-			if(battingOrder.equals("X")) {
+			if(skip || battingOrder.equals("X")) {
 				return
 			}
 
