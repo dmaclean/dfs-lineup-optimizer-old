@@ -273,9 +273,17 @@ class Predictor {
 	def readInputBaseball(List<String> data) {
 		projections["FLEX"] = [:]
 
+		// Use this as a short-term solution for dealing with early/late slates and excluding athletes.
+		// Just put the team or opponent abbreviation in there and it'll disregard the athlete.
+		def filter = []
+
 		data.each { line ->
 			def pieces = line.split(",")
 			def name = pieces[0]
+
+			if(pieces.length >= 6 && filter.contains(pieces[5])) {
+				return
+			}
 
 			/*
 			 * Grab the salary and figure out if this is the lowest value for this position.
