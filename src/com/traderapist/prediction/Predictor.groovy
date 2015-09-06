@@ -603,10 +603,16 @@ class Predictor {
 
 			def newItem
 			if(best) {
+				//noinspection GroovyAssignabilityCheck
 				newItem = new MemoItem(cost: budget, points: bestPointsForFlex, roster: [best])
 
 				// Write to table
 				table.writeSolution(depth, newItem)
+
+				if(table.items.size() == 1) {
+					bestRosters = [newItem.roster]
+					printOptimalRoster()
+				}
 			}
 
 			return newItem
