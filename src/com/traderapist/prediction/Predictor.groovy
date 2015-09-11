@@ -196,12 +196,20 @@ class Predictor {
 	 * @param file
 	 * @return
 	 */
-	def readInputFootball(file) {
+	def readInputFootball(List<String> data) {
 		projections["FLEX"] = [:]
 
-		new File(file).eachLine { line ->
+		// Use this as a short-term solution for dealing with early/late slates and excluding athletes.
+		// Just put the team or opponent abbreviation in there and it'll disregard the athlete.
+		def filter = []
+
+		data.each { line ->
 			def pieces = line.split(",")
 			def name = pieces[0]
+
+			if(pieces.length >= 6 && filter.contains(pieces[5])) {
+				return
+			}
 
 			/*
 			 * Grab the salary and figure out if this is the lowest value for this position.
@@ -791,11 +799,15 @@ class Predictor {
 
 		// If we're using FantasyPros, go scrape that and override the data array.
 		if(useFantasyPros) {
-			data = scrapeFantasyPros()
+			if(sport == SPORT_BASEBALL) {
+				data = scrapeFantasyPros()
+			} else if(sport == SPORT_FOOTBALL) {
+				data = scrapeFantasyProsNfl()
+			}
 		}
 
 		if(sport == SPORT_FOOTBALL)
-			readInputFootball(file)
+			readInputFootball(data)
 		else if(sport == SPORT_BASEBALL)
 			readInputBaseball(data)
 		else if(sport == SPORT_BASKETBALL)
@@ -918,6 +930,67 @@ class Predictor {
 
 			playerData += time + "," + opponent
 			playersData.add(playerData)
+		}
+
+		return playersData
+	}
+
+	/**
+	 * Scrape FantasyPros projections and format them into the <name>,<position>,<projection>,<salary> strings
+	 * that can be processed by the optimizer.
+	 *
+	 * @return	A list of comma-separated values; one for each athlete.
+	 */
+	def scrapeFantasyProsNfl() {
+		// Determine the name of the cheat sheet to use based on the site we're creating lineups for.
+		def siteUrl = site == DRAFT_KINGS ? "draftkings" : "fanduel"
+
+		def positions = ["QB", "RB", "WR", "TE", "K", "DEF"]
+		def playersData = []
+		positions.each {position ->
+			if(site == DRAFT_KINGS && position == "K") {
+				return
+			}
+
+			// The rest of the script uses "DEF" to indicate a defense, but FantasyPros uses "DST" in their URL.
+			def adjustedPositionForUrl = position == "DEF" ? "DST" : position
+			def data = new URL("http://www.fantasypros.com/nfl/${siteUrl}-cheatsheet.php?position=${adjustedPositionForUrl}").getText()
+			Document doc = Jsoup.parse(data)
+			Element table = doc.getElementById("data-table")
+			def processedFirstRow = false
+			table.getElementsByTag("tr").each {Element tr ->
+				if(!processedFirstRow) {
+					processedFirstRow = true
+					return
+				}
+
+				def playerData = ""
+				def time = null
+				def team = null
+				def opponent = null
+				tr.getElementsByTag("td").eachWithIndex {Element td, i ->
+					if(i == 0) {
+						playerData += td.getElementsByTag("a").get(0).text()
+						playerData += ",${position},"
+						team = td.getElementsByTag("small").get(0).text().replace("(", "").replace(" - ${position})", "")
+					} else if(i == 1) {
+						time = td.text()
+					} else if(i == 2) {
+						opponent = td.text().replace("@","")
+					} else if(i == 10) {
+						def projection = td.text().replace(" pts", "")
+						if(projection == "") {
+							projection = 0
+						}
+						playerData += projection + ","
+					} else if(i == 11) {
+						playerData += td.text().replace("\$", "").replace(",","") + ","
+					}
+
+				}
+				playerData += time + "," + opponent
+				playersData.add(playerData)
+			}
 		}
 
 		return playersData
